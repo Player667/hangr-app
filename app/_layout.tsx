@@ -5,7 +5,6 @@ import { Redirect } from 'expo-router';
 import ExploreScreen from '../screens/ExploreScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import ChatScreen from '../screens/ChatScreen';
-import WelcomeScreen from '../screens/WelcomeScreen';
 import LoginScreen from '@/screens/LoginScreen';
 import SignupScreen from '@/screens/SignupScreen';
 
@@ -21,7 +20,7 @@ export default function Layout() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   if (!isAuthenticated) {
-    return <SignupScreen />;
+    return <LoginScreen />;
   }
 
   return (

@@ -1,234 +1,315 @@
-import AppTextInput from "@/components/AppTextInput";
-import Colors from "@/constants/Colors";
-import FontSize from "@/constants/FontSize";
-import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  SafeAreaView,
-  StyleSheet,
-  Dimensions,
-} from "react-native";
-import Ionicons from "react-native-vector-icons/Ionicons"; 
+import React, { useState } from 'react';
+import { 
+  View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Platform, Keyboard
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import DropDownPicker from 'react-native-dropdown-picker';
+import Colors from '@/constants/Colors';
 
-const SignupScreen: React.FC = () => {
+interface Props {}
+
+const SignupScreen: React.FC<Props> = () => {
+  const [isEmailMode, setIsEmailMode] = useState(false);
+
+  const [countryOpen, setCountryOpen] = useState(false);
+  const [countryValue, setCountryValue] = useState('+1');
+  const [countryItems, setCountryItems] = useState([
+    { label: 'United States (+1)', value: '+1' },
+    { label: 'Canada (+1)', value: '+1-CA' },
+    { label: 'United Kingdom (+44)', value: '+44' },
+  ]);
+  
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [email, setEmail] = useState('');
+
+  // Format phone number
+  const formatPhoneNumber = (text: string) => {
+    const digits = text.replace(/\D/g, ''); // Remove non-numeric characters
+    if (digits.length === 0) return ''; // Empty input
+    if (digits.length <= 3) return `(${digits}`;
+    if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+    if (digits.length <= 10) {
+      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    }
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+  };
+
+  const handlePhoneNumberChange = (text: string) => {
+    setPhoneNumber(formatPhoneNumber(text));
+  };
+
+  const handleContinueWithPhone = () => {
+    console.log('Continue with Phone:', countryValue, phoneNumber);
+  };
+
+  const handleContinueWithEmail = () => {
+    console.log('Continue with Email:', email);
+  };
+
+  const handleContinueWithApple = () => {
+    console.log('Continue with Apple');
+  };
+
+  const handleContinueWithGoogle = () => {
+    console.log('Continue with Google');
+  };
+
+  const handleContinueWithFacebook = () => {
+    console.log('Continue with Facebook');
+  };
+
+  const switchToEmailMode = () => {
+    setIsEmailMode(true);
+  };
+
+  const switchToPhoneMode = () => {
+    setIsEmailMode(false);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.semiCircle} />
-
-      <View
-        style={{
-          padding: 20,
-        }}
-      >
-        <View
-          style={{
-            alignItems: "center",
-            padding: 20,
-          }}
-        >
-          <Text
-            style={{
-              fontFamily: "Calibri",
-              fontSize: FontSize.xLarge,
-              maxWidth: "80%",
-              textAlign: "center",
-              color: Colors.text,
-              marginBottom: 20,
-              fontWeight: "bold",
-            }}
-          >
-            Create Account
-          </Text>
-
-          <Text
-            style={{
-              fontFamily: "Calibri-bold",
-              fontSize: FontSize.medium,
-              fontWeight: "bold",
-              maxWidth: "75%",
-              textAlign: "center",
-              color: Colors.text,
-            }}
-          >
-            Create a new account to see clothes rented near you!
-          </Text>
-        </View>
-        <View
-          style={{
-            marginVertical: 5,
-          }}
-        >
-          <AppTextInput placeholder="Email" />
-          <AppTextInput placeholder="Password" />
-          <AppTextInput placeholder="Confirm Password" />
-        </View>
-
+      <View style={styles.modalHeader}>
+        <TouchableOpacity onPress={() => console.log('Close modal')} style={styles.closeButton}>
+          <Ionicons name="close" size={24} color="#000" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Register</Text>
+        <View style={{ width: 0 }} /> {/* Empty space to balance the header */}
       </View>
 
+      <View style={styles.formContainer}>
+        {!isEmailMode && (
+          <>
+            <View style={styles.countryPickerContainer}>
+              <Text style={styles.label}>Country/Region</Text>
+              <View style={styles.dropdownWrapper}>
+                <DropDownPicker
+                  open={countryOpen}
+                  value={countryValue}
+                  items={countryItems}
+                  setOpen={setCountryOpen}
+                  setValue={setCountryValue}
+                  setItems={setCountryItems}
+                  style={styles.dropdown}
+                  dropDownContainerStyle={styles.dropdownContainer}
+                  placeholder="Select a country"
+                />
+              </View>
+            </View>
 
-      {/* Sign Up Button */}
-      <TouchableOpacity
-        style={{
-          padding: 10 * 2,
-          backgroundColor: Colors.primary,
-          marginVertical: 10 * 3,
-          borderRadius: 10,
-          shadowColor: Colors.primary,
-          shadowOffset: {
-            width: 5,
-            height: 5,
-          },
-          shadowOpacity: 0.3,
-          shadowRadius: 10,
-          width:  Dimensions.get("window").width - 40,
-        }}
-      >
-        <Text
-          style={{
-            fontFamily: "Calibri",
-            color: Colors.onPrimary,
-            textAlign: "center",
-            fontSize: FontSize.large,
-            fontWeight: "bold",
-          }}
-        >
-          Sign Up
-        </Text>
-      </TouchableOpacity>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Phone number</Text>
+              <TextInput
+                placeholder="Phone number"
+                keyboardType="phone-pad"
+                value={phoneNumber}
+                onChangeText={handlePhoneNumberChange}
+                style={styles.textInput}
+                returnKeyType="done"
+                onSubmitEditing={() => Keyboard.dismiss()}
+                maxLength={14}
+              />
+            </View>
 
-      {/* Already Have Account */}
-      <TouchableOpacity
-        onPress={() => console.log("Navigate to Login")} // Replace with navigation logic
-        style={{
-          padding: 10,
-        }}
-      >
-        <Text
-          style={{
-            fontFamily: "poppins-semiBold",
-            color: Colors.text,
-            textAlign: "center",
-            fontSize: FontSize.small,
-            fontWeight: "bold",
-          }}
-        >
-          Already have an account
-        </Text>
-      </TouchableOpacity>
+            <Text style={styles.disclaimer}>
+              We’ll call or text to confirm your number. Standard message and data rates apply.
+            </Text>
 
-      {/* Social Media Options */}
-      <View
-        style={{
-          marginVertical: 10 * 3,
-        }}
-      >
-        <Text
-          style={{
-            fontFamily: "poppins-semiBold",
-            color: Colors.primary,
-            textAlign: "center",
-            fontSize: FontSize.small,
-            fontWeight: "bold",
-          }}
-        >
-          Or continue with
-        </Text>
+            <TouchableOpacity style={styles.continueButton} onPress={handleContinueWithPhone}>
+              <Text style={styles.continueButtonText}>Continue</Text>
+            </TouchableOpacity>
+          </>
+        )}
 
-        <View
-          style={{
-            marginTop: 10,
-            flexDirection: "row",
-            justifyContent: "center",
-          }}
-        >
-          {/* Google Button */}
-          <TouchableOpacity
-            style={{
-              padding: 10,
-              backgroundColor: Colors.mutedBackground,
-              borderRadius: 10 / 2,
-              marginHorizontal: 10,
-            }}
-          >
-            <Ionicons
-              name="logo-google"
-              color={Colors.text}
-              size={10 * 2}
-            />
-          </TouchableOpacity>
+        {isEmailMode && (
+          <>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Email</Text>
+              <TextInput
+                placeholder="Email"
+                keyboardType="email-address"
+                value={email}
+                onChangeText={setEmail}
+                style={styles.textInput}
+                returnKeyType="done"
+                onSubmitEditing={() => Keyboard.dismiss()}
+              />
+            </View>
 
-          {/* Apple Button */}
-          <TouchableOpacity
-            style={{
-              padding: 10,
-              backgroundColor: Colors.mutedBackground,
-              borderRadius: 10 / 2,
-              marginHorizontal: 10,
-            }}
-          >
-            <Ionicons
-              name="logo-apple"
-              color={Colors.text}
-              size={10 * 2}
-            />
-          </TouchableOpacity>
+            <Text style={styles.disclaimer}>
+              We’ll send you a link to confirm your email.
+            </Text>
 
-          {/* Facebook Button */}
-          <TouchableOpacity
-            style={{
-              padding: 10,
-              backgroundColor: Colors.mutedBackground,
-              borderRadius: 10 / 2,
-              marginHorizontal: 10,
-            }}
-          >
-            <Ionicons
-              name="logo-facebook"
-              color={Colors.text}
-              size={10 * 2}
-            />
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.continueButton} onPress={handleContinueWithEmail}>
+              <Text style={styles.continueButtonText}>Continue</Text>
+            </TouchableOpacity>
+          </>
+        )}
+
+        <View style={styles.dividerContainer}>
+          <View style={styles.line} />
+          <Text style={styles.orText}>or</Text>
+          <View style={styles.line} />
         </View>
+
+        {!isEmailMode && (
+          <TouchableOpacity style={styles.altButton} onPress={switchToEmailMode}>
+            <View style={styles.buttonContent}>
+              <Ionicons name="mail-outline" size={24} style={styles.icon} />
+              <Text style={styles.altButtonText}>Continue with email</Text>
+            </View>
+          </TouchableOpacity>
+        )}
+
+        {isEmailMode && (
+          <TouchableOpacity style={styles.altButton} onPress={switchToPhoneMode}>
+            <View style={styles.buttonContent}>
+              <Ionicons name="call-outline" size={24} style={styles.icon} />
+              <Text style={styles.altButtonText}>Continue with phone number</Text>
+            </View>
+          </TouchableOpacity>
+        )}
+
+        <TouchableOpacity style={styles.altButton} onPress={handleContinueWithApple}>
+          <View style={styles.buttonContent}>
+            <Ionicons name="logo-apple" size={24} style={styles.icon} />
+            <Text style={styles.altButtonText}>Continue with Apple</Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.altButton} onPress={handleContinueWithGoogle}>
+          <View style={styles.buttonContent}>
+            <Ionicons name="logo-google" size={24} style={styles.icon} />
+            <Text style={styles.altButtonText}>Continue with Google</Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.altButton} onPress={handleContinueWithFacebook}>
+          <View style={styles.buttonContent}>
+            <Ionicons name="logo-facebook" size={24} style={styles.icon} />
+            <Text style={styles.altButtonText}>Continue with Facebook</Text>
+          </View>
+        </TouchableOpacity>
+
       </View>
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: Colors.background,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    semiCircle: {
-      position: "absolute",
-      top: -250, // Move it partially off-screen
-      right: -250, // Move it partially off-screen
-      width: 500, // Diameter of the circle
-      height: 500, // Same as the width for a perfect circle
-      backgroundColor: Colors.mutedBackground, // Use your gray color
-      borderRadius: 250, // Half of the width/height to make it a circle
-      zIndex: -1, // Ensure it appears behind the content
-    },
-    content: {
-      alignItems: "center",
-      paddingHorizontal: 20,
-    },
-    title: {
-      fontFamily: "poppins-bold",
-      fontSize: 28,
-      color: Colors.text,
-      marginBottom: 10,
-    },
-    subtitle: {
-      fontFamily: "poppins-regular",
-      fontSize: 16,
-      color: Colors.text,
-      textAlign: "center",
-    },
-  });
-
 export default SignupScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'android' ? 16 : 12,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    justifyContent: 'center',
+  },
+  closeButton: {
+    position: 'absolute',
+    left: 16,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#333',
+    textAlign: 'center',
+  },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  icon: {
+    marginRight: 10,
+  },
+  formContainer: {
+    marginTop: 24,
+    paddingHorizontal: 16,
+  },
+  label: {
+    fontSize: 14,
+    marginBottom: 4,
+    color: '#555',
+    fontWeight: '500',
+  },
+  countryPickerContainer: {
+    marginBottom: 16,
+  },
+  dropdownWrapper: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+  },
+  dropdown: {
+    borderWidth: 0,
+    minHeight: 50,
+  },
+  dropdownContainer: {
+    borderColor: '#ddd',
+  },
+  inputContainer: {
+    marginBottom: 16,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: Colors.lightBlack,
+    borderRadius: 8,
+    height: 50,
+    padding: 12,
+    fontSize: 16,
+  },
+  disclaimer: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 24,
+  },
+  continueButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: 8,
+    padding: 15,
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  continueButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#ddd',
+  },
+  orText: {
+    marginHorizontal: 8,
+    fontSize: 14,
+    color: '#555',
+    fontWeight: '500',
+  },
+  altButton: {
+    borderWidth: 1,
+    borderColor: Colors.lightBlack,
+    borderRadius: 8,
+    padding: 15,
+    alignItems: 'center',
+    marginBottom: 18,
+  },
+  altButtonText: {
+    fontSize: 16,
+    fontWeight: '400',
+    color: '#000',
+  },
+});
