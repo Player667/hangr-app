@@ -36,7 +36,7 @@ export default function Layout() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        headerShown: true,
+        headerShown: false,
         tabBarStyle: styles.tabBar,
         tabBarActiveTintColor: '#FF6211',
         tabBarInactiveTintColor: Colors.lightBlack ,
