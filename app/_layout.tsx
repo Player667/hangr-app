@@ -12,6 +12,7 @@ import ProfileScreen from '../screens/ProfileScreen';
 import ChatScreen from '../screens/ChatScreen';
 import LoginScreen from '@/screens/LoginScreen';
 import SignupScreen from '@/screens/SignupScreen';
+import Colors from '@/constants/Colors';
 
 
 type TabParamList = {
@@ -25,7 +26,7 @@ type TabParamList = {
 const Tab = createBottomTabNavigator<TabParamList>();
 
 export default function Layout() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   if (!isAuthenticated) {
     return <LoginScreen />;
@@ -38,7 +39,7 @@ export default function Layout() {
         headerShown: true,
         tabBarStyle: styles.tabBar,
         tabBarActiveTintColor: '#FF6211',
-        tabBarInactiveTintColor: '#95a5a6',
+        tabBarInactiveTintColor: Colors.lightBlack ,
         tabBarLabelStyle: styles.tabLabel,
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
@@ -97,6 +98,7 @@ const styles = StyleSheet.create({
   tabLabel: {
     fontSize: 10,
     fontWeight: '600',
+    color: Colors.lightBlack,
     paddingTop: 3,
   },
   tabIconContainer: {
