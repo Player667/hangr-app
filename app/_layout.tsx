@@ -25,7 +25,7 @@ type TabParamList = {
 const Tab = createBottomTabNavigator<TabParamList>();
 
 export default function Layout() {
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   if (!isAuthenticated) {
     return <LoginScreen />;

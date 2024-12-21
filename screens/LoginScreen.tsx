@@ -97,7 +97,7 @@ const LoginScreen: React.FC<Props> = () => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Phone number</Text>
+              <Text style={styles.label}>Phone Number</Text>
               <TextInput
                 placeholder="Phone number"
                 keyboardType="phone-pad"
@@ -155,7 +155,7 @@ const LoginScreen: React.FC<Props> = () => {
           <TouchableOpacity style={styles.altButton} onPress={switchToEmailMode}>
             <View style={styles.buttonContent}>
               <Ionicons name="mail-outline" size={24} style={styles.icon} />
-              <Text style={styles.altButtonText}>Continue with email</Text>
+              <Text style={styles.altButtonText}>Continue with Email</Text>
             </View>
           </TouchableOpacity>
         )}
@@ -164,7 +164,7 @@ const LoginScreen: React.FC<Props> = () => {
           <TouchableOpacity style={styles.altButton} onPress={switchToPhoneMode}>
             <View style={styles.buttonContent}>
               <Ionicons name="call-outline" size={24} style={styles.icon} />
-              <Text style={styles.altButtonText}>Continue with phone number</Text>
+              <Text style={styles.altButtonText}>Continue with Phone Number</Text>
             </View>
           </TouchableOpacity>
         )}
