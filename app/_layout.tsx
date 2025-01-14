@@ -83,6 +83,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#ffffff',
+    padding: 0, // Remove padding if any
+    margin: 0, // Remove margin if any
   },
   content: {
     flex: 1,
@@ -91,9 +93,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderTopWidth: 3,
     borderTopColor: '#dcdcdc',
-    height: 100,
-    paddingBottom: 5,
-    paddingTop: 0,
+    height: 83, // Explicit height to standardize across devices
+    paddingBottom: 5, // Optional if required for spacing
   },
   tabLabel: {
     fontSize: 10,

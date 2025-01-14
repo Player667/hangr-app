@@ -1,4 +1,4 @@
-// ExploreScreen.tsx
+import Card from '@/components/Card';
 import React, { useState } from 'react';
 import {
   View,
@@ -7,17 +7,16 @@ import {
   TextInput,
   ScrollView,
   TouchableOpacity,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-// A filter item interface:
 interface FilterItem {
   label: string;
-  iconName: string; // Ionicons name, e.g., "shirt-outline", "bag-outline", etc.
+  iconName: string;
 }
 
-// Filter data:
 const FILTERS: FilterItem[] = [
   { label: 'T-Shirts', iconName: 'shirt-outline' },
   { label: 'Jeans', iconName: 'briefcase-outline' },
@@ -30,55 +29,133 @@ const FILTERS: FilterItem[] = [
   { label: 'Sunglasses', iconName: 'glasses-outline' },
 ];
 
+const MOCK_CARDS = [
+  {
+    imageUrl:
+      'https://unsplash.com/photos/a-red-jacket-hanging-on-a-clothes-line-L7MBmE1VbVg',
+    location: 'Saugerties, New York',
+    subtitle: 'Featured in Architectural Digest Jan 13 – 18',
+    price: '$1,014 night',
+    rating: 4.88,
+  },
+  {
+    imageUrl:
+      'https://images.unsplash.com/photo-1613966213478-0a7f4fa544a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    location: 'Malibu, California',
+    subtitle: 'Oceanfront Property Jan 20 – 25',
+    price: '$2,200 night',
+    rating: 4.95,
+  },
+  {
+    imageUrl:
+      'https://images.unsplash.com/photo-1613966213478-0a7f4fa544a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    location: 'Frisco, Texas',
+    subtitle: 'Beachfront Property Jan 20 – 25',
+    price: '$2,200 night',
+    rating: 4.95,
+  },
+  {
+    imageUrl:
+      'https://images.unsplash.com/photo-1613966213478-0a7f4fa544a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    location: 'Malibu, California',
+    subtitle: 'Oceanfront Property Jan 01 – Feb 25',
+    price: '$2,200 night',
+    rating: 5.00,
+  },
+  {
+    imageUrl:
+      'https://images.unsplash.com/photo-1613966213478-0a7f4fa544a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    location: 'Malibu, California',
+    subtitle: 'Oceanfront Property Jan 20 – 25',
+    price: '$2,200 night',
+    rating: 2.70,
+  },
+  {
+    imageUrl:
+      'https://images.unsplash.com/photo-1613966213478-0a7f4fa544a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    location: 'Malibu, California',
+    subtitle: 'Oceanfront Property Jan 20 – 25',
+    price: '$2,200 night',
+    rating: 3.85,
+  },
+];
+
+const HEADER_HEIGHT = 110; 
+
 const ExploreScreen: React.FC = () => {
-  // Keep track of which filter is selected
   const [selectedFilter, setSelectedFilter] = useState<string>('');
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Search Bar */}
-      <View style={styles.searchBarContainer}>
-        <Ionicons
-          name="search-outline"
-          size={24} 
-          color="#555"
-          style={styles.searchIcon}
-        />
-        <TextInput
-          placeholder="Start your search"
-          placeholderTextColor="#888"
-          style={styles.searchInput}
-        />
+      {/* Fixed Header (Search Bar + Filter Bar) */}
+      <View style={styles.fixedHeaderContainer}>
+        {/* Search Bar */}
+        <View style={styles.searchBarContainer}>
+          <Ionicons
+            name="search-outline"
+            size={24}
+            color="#555"
+            style={styles.searchIcon}
+          />
+          <TextInput
+            placeholder="Start your search"
+            placeholderTextColor="#888"
+            style={styles.searchInput}
+          />
+        </View>
+
+        {/* Horizontal Filter Icons */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterScrollContainer}
+        >
+          {FILTERS.map((filter, idx) => {
+            const isSelected = selectedFilter === filter.label;
+            return (
+              <TouchableOpacity
+                key={idx}
+                style={styles.filterItem}
+                onPress={() => setSelectedFilter(filter.label)}
+              > 
+                <Ionicons
+                  name={filter.iconName}
+                  size={24}
+                  color={isSelected ? '#FF6211' : '#000'}
+                  style={styles.filterIcon}
+                />
+                <Text
+                  style={[
+                    styles.filterLabel,
+                    isSelected && styles.filterLabelSelected,
+                  ]}
+                >
+                  {filter.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
       </View>
 
-      {/* Horizontal Filter/Icons */}
+      {/* Scrollable Card List */}
       <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filterScrollContainer}
+        style={styles.cardScrollView}
+        showsVerticalScrollIndicator={false}
       >
-        {FILTERS.map((filter, idx) => {
-          const isSelected = selectedFilter === filter.label;
-          return (
-            <TouchableOpacity
-              key={idx}
-              style={[styles.filterItem]}
-              onPress={() => setSelectedFilter(filter.label)}
-            >
-              <Ionicons
-                name={filter.iconName}
-                size={24} // match the bottom-nav icon size
-                color={isSelected ? '#FF6211' : '#000'}
-                style={styles.filterIcon}
-              />
-              <Text
-                style={[styles.filterLabel, isSelected && styles.filterLabelSelected]}
-              >
-                {filter.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
+        <View style={{ paddingBottom: 0 }}>
+          {MOCK_CARDS.map((cardData, index) => (
+            <Card
+              key={index}
+              imageUrl={cardData.imageUrl}
+              location={cardData.location}
+              subtitle={cardData.subtitle}
+              price={cardData.price}
+              rating={cardData.rating}
+              style={index === 0 ? { marginTop: 20 } : {}} // Add marginTop to the first card
+            />
+          ))}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -91,15 +168,36 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  // Search Bar styles
+
+  // The pinned container for Search Bar & Filter
+  fixedHeaderContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 2,
+    backgroundColor: '#fff',
+    // Subtle shadow for the entire header area
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 4,
+    paddingBottom: 8,
+  },
+
+  // The scrollable area for cards
+  cardScrollView: {
+    marginTop: HEADER_HEIGHT,
+  },
+
+  // Search Bar
   searchBarContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginHorizontal: 16,
-    marginTop: 16,
-    marginBottom: 8,
-
-    // More "Airbnb-like" styling:
+    marginTop: 50,        // Extra spacing at the top
+    marginBottom: 10,     // Slightly separate from filters
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#ddd',
@@ -107,12 +205,12 @@ const styles = StyleSheet.create({
     height: 50,
     paddingHorizontal: 16,
 
-    // Subtle shadow:
+    // Subtle shadow
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   searchIcon: {
     marginRight: 10,
@@ -124,10 +222,11 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
-  // Filter row styles
+  // Filters
   filterScrollContainer: {
+    marginTop: 5,
     marginHorizontal: 8,
-    paddingVertical: 8,
+    paddingBottom: 5, // space below filter icons
   },
   filterItem: {
     width: 70,
