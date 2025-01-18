@@ -58,70 +58,72 @@ const Card: React.FC<CardProps> = ({
 export default Card;
 
 const styles = StyleSheet.create({
-  cardContainer: {
-    marginTop: 5,
-    marginHorizontal: 16,
-    marginBottom: 20,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    // Shadow (iOS) / Elevation (Android)
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 5,
-    elevation: 3,
-  },
-  imageContainer: {
-    position: 'relative',
-  },
-  cardImage: {
-    width: '100%',
-    height: 275,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-    resizeMode: 'cover',
-  },
-  heartIconContainer: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    borderRadius: 20,
-    padding: 6,
-  },
-  textContainer: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  locationText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
-  },
-  subtitleText: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 10,
-  },
-  bottomRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  priceText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  ratingText: {
-    marginLeft: 4,
-    fontSize: 14,
-    color: '#000',
-    fontWeight: '500',
-  },
-});
+    cardContainer: {
+      marginTop: 5,
+      marginHorizontal: 16,
+      marginBottom: 20,
+      backgroundColor: '#fff',
+      borderRadius: 12,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.15,
+      shadowRadius: 5,
+      elevation: 3,
+    },
+    imageContainer: {
+      position: 'relative',
+      alignItems: 'center',
+    },
+    cardImage: {
+        width: '100%',
+        height: 275,   // Fixed height for the containe
+        borderTopLeftRadius: 12,
+        borderTopRightRadius: 12,
+        resizeMode: 'cover', // Fill the box while keeping the image central
+        alignSelf: 'center',
+      },
+    heartIconContainer: {
+      position: 'absolute',
+      top: 10,
+      right: 10,
+      backgroundColor: 'rgba(0,0,0,0.3)',
+      borderRadius: 20,
+      padding: 6,
+    },
+    textContainer: {
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+    },
+    locationText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#000',
+    },
+    subtitleText: {
+      fontSize: 14,
+      color: '#666',
+      marginTop: 10,
+    },
+    bottomRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: 10,
+    },
+    priceText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#000',
+    },
+    ratingContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    ratingText: {
+      marginLeft: 4,
+      fontSize: 14,
+      color: '#000',
+      fontWeight: '500',
+    },
+  });
+  

@@ -32,7 +32,7 @@ const FILTERS: FilterItem[] = [
 const MOCK_CARDS = [
   {
     imageUrl:
-      'https://unsplash.com/photos/a-red-jacket-hanging-on-a-clothes-line-L7MBmE1VbVg',
+      'https://images.unsplash.com/photo-1517849845537-4d257902454a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
     location: 'Saugerties, New York',
     subtitle: 'Featured in Architectural Digest Jan 13 – 18',
     price: '$1,014 night',
@@ -40,7 +40,7 @@ const MOCK_CARDS = [
   },
   {
     imageUrl:
-      'https://images.unsplash.com/photo-1613966213478-0a7f4fa544a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1560807707-8cc77767d783?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
     location: 'Malibu, California',
     subtitle: 'Oceanfront Property Jan 20 – 25',
     price: '$2,200 night',
@@ -48,15 +48,7 @@ const MOCK_CARDS = [
   },
   {
     imageUrl:
-      'https://images.unsplash.com/photo-1613966213478-0a7f4fa544a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    location: 'Frisco, Texas',
-    subtitle: 'Beachfront Property Jan 20 – 25',
-    price: '$2,200 night',
-    rating: 4.95,
-  },
-  {
-    imageUrl:
-      'https://images.unsplash.com/photo-1613966213478-0a7f4fa544a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1491972690050-ba117db4dc09?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
     location: 'Malibu, California',
     subtitle: 'Oceanfront Property Jan 01 – Feb 25',
     price: '$2,200 night',
@@ -64,19 +56,27 @@ const MOCK_CARDS = [
   },
   {
     imageUrl:
-      'https://images.unsplash.com/photo-1613966213478-0a7f4fa544a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1491972690050-ba117db4dc09?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
     location: 'Malibu, California',
-    subtitle: 'Oceanfront Property Jan 20 – 25',
+    subtitle: 'Oceanfront Property Jan 01 – Feb 25',
     price: '$2,200 night',
-    rating: 2.70,
+    rating: 5.00,
   },
   {
     imageUrl:
-      'https://images.unsplash.com/photo-1613966213478-0a7f4fa544a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1517849845537-4d257902454a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    location: 'Saugerties, New York',
+    subtitle: 'Featured in Architectural Digest Jan 13 – 18',
+    price: '$1,014 night',
+    rating: 4.88,
+  },
+  {
+    imageUrl:
+      'https://images.unsplash.com/photo-1560807707-8cc77767d783?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
     location: 'Malibu, California',
     subtitle: 'Oceanfront Property Jan 20 – 25',
     price: '$2,200 night',
-    rating: 3.85,
+    rating: 4.95,
   },
 ];
 
@@ -86,7 +86,7 @@ const ExploreScreen: React.FC = () => {
   const [selectedFilter, setSelectedFilter] = useState<string>('');
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       {/* Fixed Header (Search Bar + Filter Bar) */}
       <View style={styles.fixedHeaderContainer}>
         {/* Search Bar */}
@@ -142,6 +142,7 @@ const ExploreScreen: React.FC = () => {
       <ScrollView
         style={styles.cardScrollView}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 10 }}
       >
         <View style={{ paddingBottom: 0 }}>
           {MOCK_CARDS.map((cardData, index) => (
@@ -189,6 +190,7 @@ const styles = StyleSheet.create({
   // The scrollable area for cards
   cardScrollView: {
     marginTop: HEADER_HEIGHT,
+    //paddingBottom: 60,
   },
 
   // Search Bar
