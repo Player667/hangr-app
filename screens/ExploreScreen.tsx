@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginHorizontal: 16,
-    marginTop: 50,        // Extra spacing at the top
+    marginTop: 47,        // Extra spacing at the top
     marginBottom: 10,     // Slightly separate from filters
     backgroundColor: '#fff',
     borderWidth: 1,

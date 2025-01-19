@@ -5,7 +5,7 @@ import { Redirect } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 import ExploreScreen from '../screens/ExploreScreen';
-import CommunityScreen from '../screens/CommunityScreen';
+import SavedScreen from '../screens/SavedScreen';
 import ClosetScreen from '../screens/ClosetScreen';
 import RentalScreen from '../screens/RentalScreen';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -17,7 +17,7 @@ import Colors from '@/constants/Colors';
 
 type TabParamList = {
   Explore: undefined;
-  Community: undefined;
+  Saved: undefined;
   YourCloset: undefined;
   Rentals: undefined;
   Profile: undefined;
@@ -47,8 +47,8 @@ export default function Layout() {
           // Map route names to icon names
           if (route.name === 'Explore') {
             iconName = focused ? 'search' : 'search-outline';
-          } else if (route.name === 'Community') {
-            iconName = focused ? 'people' : 'people-outline';
+          } else if (route.name === 'Saved') {
+            iconName = focused ? 'heart' : 'heart-outline';
           } else if (route.name === 'Your Closet') {
             iconName = focused ? 'hanger' : 'hanger';
           } else if (route.name === 'Rentals') {
@@ -71,7 +71,7 @@ export default function Layout() {
       })}
     >
       <Tab.Screen name="Explore" component={ExploreScreen} />
-      <Tab.Screen name="Community" component={CommunityScreen} />
+      <Tab.Screen name="Saved" component={SavedScreen} />
       <Tab.Screen name="Your Closet" component={ClosetScreen} />
       <Tab.Screen name="Rentals" component={RentalScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
