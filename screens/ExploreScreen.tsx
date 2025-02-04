@@ -7,7 +7,6 @@ import {
   TextInput,
   ScrollView,
   TouchableOpacity,
-  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -32,7 +31,7 @@ const FILTERS: FilterItem[] = [
 const MOCK_CARDS = [
   {
     imageUrl:
-      'https://images.unsplash.com/photo-1517849845537-4d257902454a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
     location: 'Saugerties, New York',
     subtitle: 'Featured in Architectural Digest Jan 13 – 18',
     price: '$1,014 night',
@@ -52,7 +51,7 @@ const MOCK_CARDS = [
     location: 'Malibu, California',
     subtitle: 'Oceanfront Property Jan 01 – Feb 25',
     price: '$2,200 night',
-    rating: 5.00,
+    rating: 5.0,
   },
   {
     imageUrl:
@@ -60,7 +59,7 @@ const MOCK_CARDS = [
     location: 'Malibu, California',
     subtitle: 'Oceanfront Property Jan 01 – Feb 25',
     price: '$2,200 night',
-    rating: 5.00,
+    rating: 5.0,
   },
   {
     imageUrl:
@@ -80,7 +79,7 @@ const MOCK_CARDS = [
   },
 ];
 
-const HEADER_HEIGHT = 110; 
+const HEADER_HEIGHT = 110;
 
 const ExploreScreen: React.FC = () => {
   const [selectedFilter, setSelectedFilter] = useState<string>('');
@@ -98,7 +97,7 @@ const ExploreScreen: React.FC = () => {
             style={styles.searchIcon}
           />
           <TextInput
-            placeholder="Start your search"
+            placeholder="Start your search!"
             placeholderTextColor="#888"
             style={styles.searchInput}
           />
@@ -117,17 +116,17 @@ const ExploreScreen: React.FC = () => {
                 key={idx}
                 style={styles.filterItem}
                 onPress={() => setSelectedFilter(filter.label)}
-              > 
+              >
                 <Ionicons
                   name={filter.iconName}
                   size={24}
-                  color={isSelected ? '#FF6211' : '#000'}
+                  color={isSelected ? '#FF6211' : '#444'}
                   style={styles.filterIcon}
                 />
                 <Text
                   style={[
                     styles.filterLabel,
-                    isSelected && styles.filterLabelSelected,
+                    isSelected && { color: '#FF6211', fontWeight: '600' },
                   ]}
                 >
                   {filter.label}
@@ -153,7 +152,7 @@ const ExploreScreen: React.FC = () => {
               subtitle={cardData.subtitle}
               price={cardData.price}
               rating={cardData.rating}
-              style={index === 0 ? { marginTop: 20 } : {}} // Add marginTop to the first card
+              style={index === 0 ? { marginTop: 20 } : {}}
             />
           ))}
         </View>
@@ -164,49 +163,44 @@ const ExploreScreen: React.FC = () => {
 
 export default ExploreScreen;
 
+/* --- Styles --- */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#F8F9FB', // unify background
   },
-
-  // The pinned container for Search Bar & Filter
   fixedHeaderContainer: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     zIndex: 2,
-    backgroundColor: '#fff',
-    // Subtle shadow for the entire header area
+    backgroundColor: '#F8F9FB',
+    // Subtle shadow for the header
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.15,
     shadowRadius: 6,
     elevation: 4,
     paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
   },
-
-  // The scrollable area for cards
   cardScrollView: {
     marginTop: HEADER_HEIGHT,
-    //paddingBottom: 60,
   },
-
-  // Search Bar
   searchBarContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: 16,
-    marginTop: 47,        // Extra spacing at the top
-    marginBottom: 10,     // Slightly separate from filters
+    marginHorizontal: 25,
+    marginTop: 47,
+    marginBottom: 10,
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 30,
     height: 50,
     paddingHorizontal: 16,
-
     // Subtle shadow
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -223,15 +217,13 @@ const styles = StyleSheet.create({
     color: '#000',
     fontWeight: '500',
   },
-
-  // Filters
   filterScrollContainer: {
     marginTop: 5,
     marginHorizontal: 8,
-    paddingBottom: 5, // space below filter icons
+    paddingBottom: 5,
   },
   filterItem: {
-    width: 70,
+    width: 60,
     alignItems: 'center',
     marginHorizontal: 8,
   },
@@ -239,10 +231,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   filterLabel: {
-    fontSize: 12,
-    color: '#333',
-  },
-  filterLabelSelected: {
-    color: '#FF6211',
+    fontSize: 11,
+    color: '#444',
   },
 });

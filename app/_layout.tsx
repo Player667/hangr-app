@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StyleSheet, View } from 'react-native';
-import { Redirect } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 import ExploreScreen from '../screens/ExploreScreen';
@@ -11,15 +10,14 @@ import RentalScreen from '../screens/RentalScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import ChatScreen from '../screens/ChatScreen';
 import LoginScreen from '@/screens/LoginScreen';
-import SignupScreen from '@/screens/SignupScreen';
 import Colors from '@/constants/Colors';
-
+import MessagesScreen from '@/screens/Messages';
 
 type TabParamList = {
   Explore: undefined;
   Saved: undefined;
-  YourCloset: undefined;
   Rentals: undefined;
+  Messages: undefined;
   Profile: undefined;
 };
 
@@ -32,39 +30,39 @@ export default function Layout() {
     return <LoginScreen />;
   }
 
-  
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: styles.tabBar,
         tabBarActiveTintColor: '#FF6211',
-        tabBarInactiveTintColor: Colors.lightBlack ,
+        tabBarInactiveTintColor: Colors.lightBlack,
         tabBarLabelStyle: styles.tabLabel,
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
 
-          // Map route names to icon names
-          if (route.name === 'Explore') {
-            iconName = focused ? 'search' : 'search-outline';
-          } else if (route.name === 'Saved') {
-            iconName = focused ? 'heart' : 'heart-outline';
-          } else if (route.name === 'Your Closet') {
-            iconName = focused ? 'hanger' : 'hanger';
-          } else if (route.name === 'Rentals') {
-            iconName = focused ? 'cart' : 'cart-outline';
-          } else if (route.name === 'Profile') {
-            iconName = focused ? 'person' : 'person-outline';
+          switch (route.name) {
+            case 'Explore':
+              iconName = focused ? 'search' : 'search-outline';
+              break;
+            case 'Saved':
+              iconName = focused ? 'heart' : 'heart-outline';
+              break;
+            case 'Rentals':
+              iconName = focused ? 'cart' : 'cart-outline';
+              break;
+            case 'Messages':
+              iconName = focused ? 'chatbubble' : 'chatbubble-outline';
+              break;
+            case 'Profile':
+              iconName = focused ? 'person' : 'person-outline';
+              break;
           }
 
           return (
             <View style={styles.tabIconContainer}>
               {focused && <View style={styles.indicator} />}
-              {route.name === 'Your Closet' ? (
-                <MaterialCommunityIcons name={iconName} size={size} color={color} />
-              ) : (
-                <Ionicons name={iconName} size={size} color={color} />
-              )}
+              <Ionicons name={iconName} size={size} color={color} />
             </View>
           );
         },
@@ -72,8 +70,8 @@ export default function Layout() {
     >
       <Tab.Screen name="Explore" component={ExploreScreen} />
       <Tab.Screen name="Saved" component={SavedScreen} />
-      <Tab.Screen name="Your Closet" component={ClosetScreen} />
       <Tab.Screen name="Rentals" component={RentalScreen} />
+      <Tab.Screen name="Messages" component={MessagesScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
@@ -83,8 +81,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#ffffff',
-    padding: 0, // Remove padding if any
-    margin: 0, // Remove margin if any
+    padding: 0,
+    margin: 0,
   },
   content: {
     flex: 1,
@@ -93,8 +91,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderTopWidth: 3,
     borderTopColor: '#dcdcdc',
-    height: 83, // Explicit height to standardize across devices
-    paddingBottom: 5, // Optional if required for spacing
+    height: 83,
+    paddingBottom: 5,
   },
   tabLabel: {
     fontSize: 10,
@@ -108,10 +106,10 @@ const styles = StyleSheet.create({
   },
   indicator: {
     position: 'absolute',
-    top: -10, // Position above the icon
-    width: 80, // Adjust width as needed
-    height: 3, // Indicator thickness
-    backgroundColor: '#FF6211', // Active color
-    borderRadius: 1.5, // Rounded edges
+    top: -10,
+    width: 80,
+    height: 3,
+    backgroundColor: '#FF6211',
+    borderRadius: 1.5,
   },
 });

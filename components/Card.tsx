@@ -11,10 +11,10 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 interface CardProps {
   imageUrl: string;
   location: string;
-  subtitle: string;    // e.g. "Featured in Architectural Digest Jan 13 – 18"
-  price: string;       // e.g. "$1,014 night"
-  rating: number;      // e.g. 4.88
-  style?: object;      // Optional style prop
+  subtitle: string;  
+  price: string;     
+  rating: number;    
+  style?: object;    
 }
 
 const Card: React.FC<CardProps> = ({
@@ -25,17 +25,11 @@ const Card: React.FC<CardProps> = ({
   rating,
   style,
 }) => {
-  // State to manage the heart icon's filled (liked) or outlined (not liked) state
   const [isLiked, setIsLiked] = useState(false);
-
-  // Function to handle the heart icon press
-  const handleHeartPress = () => {
-    setIsLiked(!isLiked);
-  };
+  const handleHeartPress = () => setIsLiked(!isLiked);
 
   return (
     <View style={[styles.cardContainer, style]}>
-      {/* Card Image + Heart Icon */}
       <View style={styles.imageContainer}>
         <Image source={{ uri: imageUrl }} style={styles.cardImage} />
         <TouchableOpacity
@@ -45,7 +39,7 @@ const Card: React.FC<CardProps> = ({
           <Ionicons
             name={isLiked ? 'heart' : 'heart-outline'}
             size={20}
-            color={isLiked ? '#FF6211' : '#fff'} // Change color based on isLiked state
+            color={isLiked ? '#FF6211' : '#fff'}
           />
         </TouchableOpacity>
       </View>
@@ -55,11 +49,9 @@ const Card: React.FC<CardProps> = ({
         <Text style={styles.locationText}>{location}</Text>
         <Text style={styles.subtitleText}>{subtitle}</Text>
         <View style={styles.bottomRow}>
-          <View>
-            <Text style={styles.priceText}>{price}</Text>
-          </View>
+          <Text style={styles.priceText}>{price}</Text>
           <View style={styles.ratingContainer}>
-            <Ionicons name="star" size={14} color="#000" />
+            <Ionicons name="star" size={14} color="#FF6211" />
             <Text style={styles.ratingText}>{rating.toFixed(2)}</Text>
           </View>
         </View>
@@ -70,18 +62,19 @@ const Card: React.FC<CardProps> = ({
 
 export default Card;
 
+/* --- Styles --- */
 const styles = StyleSheet.create({
   cardContainer: {
-    marginTop: 5,
-    marginHorizontal: 16,
+    marginTop: 10,
+    marginHorizontal: 15,
     marginBottom: 20,
     backgroundColor: '#fff',
-    borderRadius: 12,
+    borderRadius: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
     shadowRadius: 5,
-    elevation: 3,
+    elevation: 2,
   },
   imageContainer: {
     position: 'relative',
@@ -89,39 +82,38 @@ const styles = StyleSheet.create({
   },
   cardImage: {
     width: '100%',
-    height: 275,   // Fixed height for the container
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-    resizeMode: 'cover', // Fill the box while keeping the image central
-    alignSelf: 'center',
+    height: 275,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    resizeMode: 'cover',
   },
   heartIconContainer: {
     position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    top: 12,
+    right: 12,
+    backgroundColor: 'rgba(0,0,0,0.35)',
     borderRadius: 20,
     padding: 6,
   },
   textContainer: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
   },
   locationText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#000',
   },
   subtitleText: {
     fontSize: 14,
     color: '#666',
-    marginTop: 10,
+    marginTop: 2,
   },
   bottomRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 12,
   },
   priceText: {
     fontSize: 16,
