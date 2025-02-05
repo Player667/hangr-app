@@ -7,43 +7,32 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { CardProps } from './Card';
 
-interface ClosetCardProps {
-  imageUrl: string;
-  brand: string;
-  name: string;
-  size: string;
-  price: string;
-}
 
-const ClosetCard: React.FC<ClosetCardProps> = ({
+const ClosetCard: React.FC<CardProps> = ({
   imageUrl,
-  brand,
-  name,
+  listing,
+  category,
   size,
-  price,
+  rentalPrice,
 }) => {
-  const [isLiked, setIsLiked] = useState(false);
-
-  const toggleLike = () => setIsLiked((prev) => !prev);
 
   return (
     <View style={styles.clothesCard}>
       <View style={styles.imageContainer}>
         <Image source={{ uri: imageUrl }} style={styles.image} />
-        <TouchableOpacity style={styles.heartIconButton} onPress={toggleLike}>
-          <Ionicons
-            name={isLiked ? 'heart' : 'heart-outline'}
-            size={22}
-            color={isLiked ? '#FF6211' : '#fff'}
-          />
+        <TouchableOpacity style={styles.overlayIconContainer}>
+          <Ionicons name="calendar-outline" size={20} color="#fff"/>
         </TouchableOpacity>
       </View>
       <View style={styles.textContainer}>
-        <Text style={styles.brandText}>{brand}</Text>
-        <Text style={styles.nameText}>{name}</Text>
+        <Text style={styles.listingText}
+        numberOfLines={1}
+        ellipsizeMode="tail">{listing}</Text>
+        <Text style={styles.categoryText}>{category}</Text>
         <Text style={styles.sizeText}>{size}</Text>
-        <Text style={styles.priceText}>{price}</Text>
+        <Text style={styles.priceText}>${rentalPrice} / Day</Text>
       </View>
     </View>
   );
@@ -78,23 +67,23 @@ const styles = StyleSheet.create({
     height: '100%',
     resizeMode: 'cover',
   },
-  heartIconButton: {
+  overlayIconContainer: {
     position: 'absolute',
     top: 8,
     right: 8,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    borderRadius: 20,
-    padding: 4,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    padding: 6,
+    borderRadius: 16,
   },
   textContainer: {
     padding: 8,
   },
-  brandText: {
-    fontSize: 14,
+  listingText: {
+    fontSize: 17,
     fontWeight: '600',
-    color: '#FF6211', // highlight brand in orange
+    color: '#333',
   },
-  nameText: {
+  categoryText: {
     fontSize: 13,
     color: '#333',
     marginVertical: 2,
@@ -105,7 +94,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   priceText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '700',
     color: '#000',
   },

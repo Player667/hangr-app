@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
   View,
@@ -8,31 +8,14 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient'; // Import LinearGradient for button styling
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ClosetCard from '@/components/ClosetCard';
-
-const MOCK_CLOSET_ITEMS = [
-  {
-    id: '1',
-    imageUrl:
-      'https://images.unsplash.com/photo-1604014237744-df3c8f9305a8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    brand: 'Nike',
-    name: 'Air Max 2021',
-    size: 'Men’s 10.5',
-    price: '$35 / day',
-  },
-  {
-    id: '2',
-    imageUrl:
-      'https://images.unsplash.com/photo-1618354691325-68baad1f3d50?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    brand: 'Levi’s',
-    name: 'Denim Jacket',
-    size: 'Medium',
-    price: '$20 / day',
-  },
-];
+import { LISTING_ITEMS } from '@/constants/MockData';
 
 const ProfileScreen: React.FC = () => {
+  const [myCloset] = useState(LISTING_ITEMS);
+
   return (
     <SafeAreaView style={styles.container}>
       {/* -- Header -- */}
@@ -93,14 +76,13 @@ const ProfileScreen: React.FC = () => {
         {/* -- Closet Section -- */}
         <Text style={styles.closetTitle}>My Closet</Text>
         <View style={styles.gridContainer}>
-          {MOCK_CLOSET_ITEMS.map((item) => (
+          {myCloset.map((cardData) => (
             <ClosetCard
-              key={item.id}
-              imageUrl={item.imageUrl}
-              brand={item.brand}
-              name={item.name}
-              size={item.size}
-              price={item.price}
+              imageUrl={cardData.imageUrl}
+              listing={cardData.listing}
+              category={cardData.category}
+              size={cardData.size}
+              rentalPrice={cardData.rentalPrice}
             />
           ))}
         </View>
@@ -113,8 +95,15 @@ const ProfileScreen: React.FC = () => {
           // Handle "Add Listing"
         }}
       >
-        <Ionicons name="add-circle-outline" size={24} color="#fff" style={{ marginRight: 8 }} />
-        <Text style={styles.addListingText}>Add Listing</Text>
+        <LinearGradient
+                    colors={['#F00', '#FFC422']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.gradientButton}
+                  >
+                        <Ionicons name="add-circle-outline" size={24} color="#fff" style={{ marginRight: 8 }} />
+                        <Text style={styles.addListingText}>Add Listing</Text>
+        </LinearGradient>
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -267,15 +256,12 @@ const styles = StyleSheet.create({
   /* Floating Button */
   addListingButton: {
     position: 'absolute',
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     bottom: 30,
     alignSelf: 'center',
     backgroundColor: '#FF6211',
     borderRadius: 30,
-    paddingHorizontal: 20,
-    paddingVertical: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.15,
@@ -283,9 +269,16 @@ const styles = StyleSheet.create({
     elevation: 6,
     zIndex: 5,
   },
+  gradientButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+  },
   addListingText: {
     color: '#fff',
     fontWeight: '700',
-    fontSize: 16,
+    fontSize: 20,
   },
 });

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
   View,
@@ -9,73 +9,11 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
-/** Example rental data */
-const MOCK_RENTALS = [
-  {
-    id: '1',
-    imageUrl:
-      'https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    brand: 'Nike',
-    name: 'Air Max 2022',
-    dateRange: 'Feb 10 – Feb 14, 2025',
-  },
-  {
-    id: '2',
-    imageUrl:
-      'https://images.unsplash.com/photo-1566753323558-f4e0952af115?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    brand: 'Levi’s',
-    name: 'Vintage Denim Jacket',
-    dateRange: 'Mar 01 – Mar 05, 2025',
-  },
-  {
-    id: '3',
-    imageUrl:
-      'https://images.unsplash.com/photo-1580236931351-1c71daae5d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    brand: 'Gucci',
-    name: 'Designer Sunglasses',
-    dateRange: 'Mar 20 – Mar 25, 2025',
-  },
-  {
-    id: '4',
-    imageUrl:
-      'https://images.unsplash.com/photo-1575713832033-4e2791afafc0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    brand: 'Adidas',
-    name: 'Track Pants',
-    dateRange: 'Apr 01 – Apr 04, 2025',
-  },
-];
-
-/** Single card to show each rented item */
-const RentalCard = ({
-  imageUrl,
-  brand,
-  name,
-  dateRange,
-}: {
-  imageUrl: string;
-  brand: string;
-  name: string;
-  dateRange: string;
-}) => {
-  return (
-    <View style={styles.rentalCard}>
-      <View style={styles.imageContainer}>
-        <Image source={{ uri: imageUrl }} style={styles.rentalImage} />
-        <View style={styles.overlayIconContainer}>
-          <Ionicons name="calendar-outline" size={20} color="#fff" />
-        </View>
-      </View>
-      <View style={styles.cardTextContainer}>
-        <Text style={styles.brandText}>{brand}</Text>
-        <Text style={styles.nameText}>{name}</Text>
-        <Text style={styles.dateText}>{dateRange}</Text>
-      </View>
-    </View>
-  );
-};
+import { LISTING_ITEMS } from '@/constants/MockData';
+import ClosetCard from '@/components/ClosetCard';
 
 const RentalScreen: React.FC = () => {
+  const [myRentals] = useState(LISTING_ITEMS);
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -89,21 +27,19 @@ const RentalScreen: React.FC = () => {
 
       {/* 2‐Column Rental Items List */}
       <FlatList
-        style={styles.list}
-        data={MOCK_RENTALS}
-        keyExtractor={(item) => item.id}
+        data={myRentals}
         renderItem={({ item }) => (
-          <RentalCard
+            <ClosetCard
             imageUrl={item.imageUrl}
-            brand={item.brand}
-            name={item.name}
-            dateRange={item.dateRange}
-          />
+            listing={item.listing}
+            category={item.category}
+            size={item.size}
+            rentalPrice={item.rentalPrice}/>
+  
         )}
+        keyExtractor={(item, index) => index.toString()}
         numColumns={2}
-        contentContainerStyle={styles.listContentContainer}
-        showsVerticalScrollIndicator={false}
-      />
+        columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 8 }}/>
     </SafeAreaView>
   );
 };
@@ -141,9 +77,11 @@ const styles = StyleSheet.create({
   list: {
     flex: 1,
   },
-  listContentContainer: {
-    paddingHorizontal: 6,
-    paddingBottom: 24,
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginHorizontal: 16,
   },
   rentalCard: {
     flex: 1,

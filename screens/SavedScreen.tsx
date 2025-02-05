@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -9,28 +9,13 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Card from '@/components/Card';
+import { LISTING_ITEMS } from '@/constants/MockData';
 
-const MOCK_SAVED_CARDS = [
-  {
-    imageUrl:
-      'https://images.unsplash.com/photo-1491972690050-ba117db4dc09?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    location: 'Malibu, California',
-    subtitle: 'Oceanfront Property Jan 01 – Feb 25',
-    price: '$2,200 night',
-    rating: 5.0,
-  },
-  {
-    imageUrl:
-      'https://images.unsplash.com/photo-1560807707-8cc77767d783?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    location: 'Saugerties, New York',
-    subtitle: 'Featured in Architectural Digest Jan 13 – 18',
-    price: '$1,014 night',
-    rating: 4.88,
-  },
-];
 
 const SavedScreen: React.FC = () => {
-  const [savedItems] = useState(MOCK_SAVED_CARDS);
+  // Initialize the savedItems array (this would come from a higher-level state or localStorage in a real app)
+  const [savedItems] = useState(LISTING_ITEMS);
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -50,15 +35,20 @@ const SavedScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
       >
         {savedItems && savedItems.length > 0 ? (
-          savedItems.map((item, index) => (
+          savedItems.map((cardData, index) => (
             <Card
-              key={index}
-              imageUrl={item.imageUrl}
-              location={item.location}
-              subtitle={item.subtitle}
-              price={item.price}
-              rating={item.rating}
-            />
+            imageUrl={cardData.imageUrl}
+            listing={cardData.listing}
+            category={cardData.category}
+            rentalPrice={cardData.rentalPrice}
+            retailPrice={cardData.retailPrice}
+            size={cardData.size}
+            rating={cardData.rating}
+            ratingCount={cardData.ratingCount}
+            description={cardData.description}
+            listerId={cardData.listerId}
+            style={index === 0 ? { marginTop: 20 } : {}}
+              />
           ))
         ) : (
           <View style={styles.noSavedContainer}>

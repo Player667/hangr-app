@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { LISTING_ITEMS } from '@/constants/MockData';
 
 interface FilterItem {
   label: string;
@@ -25,63 +26,13 @@ const FILTERS: FilterItem[] = [
   { label: 'Outerwear', iconName: 'cloudy-outline' },
   { label: 'Backpacks', iconName: 'bag-outline' },
   { label: 'Watches', iconName: 'watch-outline' },
-  { label: 'Sunglasses', iconName: 'glasses-outline' },
-];
-
-const MOCK_CARDS = [
-  {
-    imageUrl:
-      'https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    location: 'Saugerties, New York',
-    subtitle: 'Featured in Architectural Digest Jan 13 – 18',
-    price: '$1,014 night',
-    rating: 4.88,
-  },
-  {
-    imageUrl:
-      'https://images.unsplash.com/photo-1560807707-8cc77767d783?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    location: 'Malibu, California',
-    subtitle: 'Oceanfront Property Jan 20 – 25',
-    price: '$2,200 night',
-    rating: 4.95,
-  },
-  {
-    imageUrl:
-      'https://images.unsplash.com/photo-1491972690050-ba117db4dc09?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    location: 'Malibu, California',
-    subtitle: 'Oceanfront Property Jan 01 – Feb 25',
-    price: '$2,200 night',
-    rating: 5.0,
-  },
-  {
-    imageUrl:
-      'https://images.unsplash.com/photo-1491972690050-ba117db4dc09?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    location: 'Malibu, California',
-    subtitle: 'Oceanfront Property Jan 01 – Feb 25',
-    price: '$2,200 night',
-    rating: 5.0,
-  },
-  {
-    imageUrl:
-      'https://images.unsplash.com/photo-1517849845537-4d257902454a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    location: 'Saugerties, New York',
-    subtitle: 'Featured in Architectural Digest Jan 13 – 18',
-    price: '$1,014 night',
-    rating: 4.88,
-  },
-  {
-    imageUrl:
-      'https://images.unsplash.com/photo-1560807707-8cc77767d783?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    location: 'Malibu, California',
-    subtitle: 'Oceanfront Property Jan 20 – 25',
-    price: '$2,200 night',
-    rating: 4.95,
-  },
+  { label: 'Glasses', iconName: 'glasses-outline' },
 ];
 
 const HEADER_HEIGHT = 110;
 
-const ExploreScreen: React.FC = () => {
+const ExploreScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
+  const [mockListings] = useState(LISTING_ITEMS);
   const [selectedFilter, setSelectedFilter] = useState<string>('');
 
   return (
@@ -97,7 +48,7 @@ const ExploreScreen: React.FC = () => {
             style={styles.searchIcon}
           />
           <TextInput
-            placeholder="Start your search!"
+            placeholder="Search for your next fit..."
             placeholderTextColor="#888"
             style={styles.searchInput}
           />
@@ -126,7 +77,7 @@ const ExploreScreen: React.FC = () => {
                 <Text
                   style={[
                     styles.filterLabel,
-                    isSelected && { color: '#FF6211', fontWeight: '600' },
+                    isSelected && { color: '#FF6211', fontWeight: '600' }, 
                   ]}
                 >
                   {filter.label}
@@ -144,16 +95,27 @@ const ExploreScreen: React.FC = () => {
         contentContainerStyle={{ paddingBottom: 10 }}
       >
         <View style={{ paddingBottom: 0 }}>
-          {MOCK_CARDS.map((cardData, index) => (
-            <Card
-              key={index}
-              imageUrl={cardData.imageUrl}
-              location={cardData.location}
-              subtitle={cardData.subtitle}
-              price={cardData.price}
-              rating={cardData.rating}
-              style={index === 0 ? { marginTop: 20 } : {}}
-            />
+          {mockListings.map((cardData, index) => (
+            <TouchableOpacity
+            key={index}
+            onPress={() => {
+              navigation.navigate('Listing', { listingData: cardData });
+            }}
+          >
+              <Card
+                imageUrl={cardData.imageUrl}
+                listing={cardData.listing}
+                category={cardData.category}
+                rentalPrice={cardData.rentalPrice}
+                retailPrice={cardData.retailPrice}
+                size={cardData.size}
+                rating={cardData.rating}
+                ratingCount={cardData.ratingCount}
+                description={cardData.description}
+                listerId={cardData.listerId}
+                style={index === 0 ? { marginTop: 20 } : {}}
+              />
+            </TouchableOpacity>
           ))}
         </View>
       </ScrollView>
@@ -193,7 +155,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginHorizontal: 25,
-    marginTop: 47,
+    marginTop: 60, // Distance of search bar from top
     marginBottom: 10,
     backgroundColor: '#fff',
     borderWidth: 1,
@@ -219,13 +181,13 @@ const styles = StyleSheet.create({
   },
   filterScrollContainer: {
     marginTop: 5,
-    marginHorizontal: 8,
+    marginHorizontal: 9,
     paddingBottom: 5,
   },
   filterItem: {
-    width: 60,
+    width: 63,
     alignItems: 'center',
-    marginHorizontal: 8,
+    marginHorizontal: 10,
   },
   filterIcon: {
     marginBottom: 4,

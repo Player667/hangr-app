@@ -8,25 +8,60 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-interface CardProps {
+// Define the Listing type
+interface Listing {
   imageUrl: string;
-  location: string;
-  subtitle: string;  
-  price: string;     
-  rating: number;    
-  style?: object;    
+  listing: string;
+  category: string;
+  size: string;
+  rentalPrice: number;
+  retailPrice: number;
+  rating: number;
+  ratingCount: number;
+  description: string;
+  listerId: string;
+}
+
+export interface CardProps extends Listing {
+  imageUrl: string;
+  listing: string;
+  category: string;
+  size: string;
+  rentalPrice: number;
+  retailPrice: number;
+  rating: number;
+  ratingCount: number;
+  description: string;
+  listerId: string;
+  style?: object;  
 }
 
 const Card: React.FC<CardProps> = ({
   imageUrl,
-  location,
-  subtitle,
-  price,
+  listing,
+  category,
+  size,
+  rentalPrice,
+  retailPrice,
   rating,
+  ratingCount,
+  description,
+  listerId,
   style,
 }) => {
+  // Manage saved items using state
   const [isLiked, setIsLiked] = useState(false);
-  const handleHeartPress = () => setIsLiked(!isLiked);
+
+  const handleHeartPress = () => {
+    setIsLiked(!isLiked);
+
+    if (!isLiked) {
+      // Like Functionality
+      
+    } else {
+      
+    }
+  };
 
   return (
     <View style={[styles.cardContainer, style]}>
@@ -46,12 +81,12 @@ const Card: React.FC<CardProps> = ({
 
       {/* Text Content */}
       <View style={styles.textContainer}>
-        <Text style={styles.locationText}>{location}</Text>
-        <Text style={styles.subtitleText}>{subtitle}</Text>
+        <Text style={styles.listingText}>{listing}</Text>
+        <Text style={styles.categoryText}>{category}</Text>
         <View style={styles.bottomRow}>
-          <Text style={styles.priceText}>{price}</Text>
+          <Text style={styles.priceText}>${rentalPrice} / Day</Text>
           <View style={styles.ratingContainer}>
-            <Ionicons name="star" size={14} color="#FF6211" />
+            <Ionicons name="star" size={18} color="#FF6211" />
             <Text style={styles.ratingText}>{rating.toFixed(2)}</Text>
           </View>
         </View>
@@ -61,6 +96,7 @@ const Card: React.FC<CardProps> = ({
 };
 
 export default Card;
+
 
 /* --- Styles --- */
 const styles = StyleSheet.create({
@@ -99,21 +135,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
   },
-  locationText: {
-    fontSize: 16,
+  listingText: {
+    fontSize: 20,
     fontWeight: '700',
     color: '#000',
   },
-  subtitleText: {
-    fontSize: 14,
+  categoryText: {
+    fontSize: 16,
     color: '#666',
-    marginTop: 2,
+    marginTop: 5,
   },
   bottomRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: 5,
   },
   priceText: {
     fontSize: 16,
@@ -126,7 +162,7 @@ const styles = StyleSheet.create({
   },
   ratingText: {
     marginLeft: 4,
-    fontSize: 14,
+    fontSize: 18,
     color: '#000',
     fontWeight: '500',
   },

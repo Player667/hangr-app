@@ -1,27 +1,20 @@
 import React, { useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
 import { StyleSheet, View } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 import ExploreScreen from '../screens/ExploreScreen';
 import SavedScreen from '../screens/SavedScreen';
-import ClosetScreen from '../screens/ClosetScreen';
 import RentalScreen from '../screens/RentalScreen';
 import ProfileScreen from '../screens/ProfileScreen';
-import ChatScreen from '../screens/ChatScreen';
-import LoginScreen from '@/screens/LoginScreen';
-import Colors from '@/constants/Colors';
 import MessagesScreen from '@/screens/Messages';
+import LoginScreen from '@/screens/LoginScreen';
+import ListingScreen from '@/screens/ListingScreen'; // Example of a non-tab screen
+import Colors from '@/constants/Colors';
 
-type TabParamList = {
-  Explore: undefined;
-  Saved: undefined;
-  Rentals: undefined;
-  Messages: undefined;
-  Profile: undefined;
-};
-
-const Tab = createBottomTabNavigator<TabParamList>();
+const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
 
 export default function Layout() {
   const [isAuthenticated, setIsAuthenticated] = useState(true);
@@ -30,7 +23,7 @@ export default function Layout() {
     return <LoginScreen />;
   }
 
-  return (
+  const BottomTabs = () => (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
@@ -39,30 +32,17 @@ export default function Layout() {
         tabBarInactiveTintColor: Colors.lightBlack,
         tabBarLabelStyle: styles.tabLabel,
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
-
-          switch (route.name) {
-            case 'Explore':
-              iconName = focused ? 'search' : 'search-outline';
-              break;
-            case 'Saved':
-              iconName = focused ? 'heart' : 'heart-outline';
-              break;
-            case 'Rentals':
-              iconName = focused ? 'cart' : 'cart-outline';
-              break;
-            case 'Messages':
-              iconName = focused ? 'chatbubble' : 'chatbubble-outline';
-              break;
-            case 'Profile':
-              iconName = focused ? 'person' : 'person-outline';
-              break;
-          }
-
+          const icons = {
+            Explore: focused ? 'search' : 'search-outline',
+            Saved: focused ? 'heart' : 'heart-outline',
+            Rentals: focused ? 'cart' : 'cart-outline',
+            Messages: focused ? 'chatbubble' : 'chatbubble-outline',
+            Profile: focused ? 'person' : 'person-outline',
+          };
           return (
             <View style={styles.tabIconContainer}>
               {focused && <View style={styles.indicator} />}
-              <Ionicons name={iconName} size={size} color={color} />
+              <Ionicons name={icons[route.name]} size={size} color={color} />
             </View>
           );
         },
@@ -75,18 +55,27 @@ export default function Layout() {
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
+
+  return (
+    <Stack.Navigator>
+      {/* The BottomTabs navigator is the main structure */}
+      <Stack.Screen
+        name="MainTabs"
+        component={BottomTabs}
+        options={{ headerShown: false }}
+      />
+
+      {/* Add other screens that are NOT in the bottom tabs here */}
+      <Stack.Screen
+        name="Listing"
+        component={ListingScreen}
+        options={{ headerShown: false }}
+      />
+    </Stack.Navigator>
+  );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-    padding: 0,
-    margin: 0,
-  },
-  content: {
-    flex: 1,
-  },
   tabBar: {
     backgroundColor: '#ffffff',
     borderTopWidth: 3,
