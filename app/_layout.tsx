@@ -11,6 +11,7 @@ import ProfileScreen from '../screens/ProfileScreen';
 import MessagesScreen from '@/screens/Messages';
 import LoginScreen from '@/screens/LoginScreen';
 import ListingScreen from '@/screens/ListingScreen'; // Example of a non-tab screen
+import UserProfileScreen from '@/screens/UserProfileScreen'; // Example of a non-tab screen
 import Colors from '@/constants/Colors';
 
 const Tab = createBottomTabNavigator();
@@ -69,6 +70,13 @@ export default function Layout() {
       <Stack.Screen
         name="Listing"
         component={ListingScreen}
+        options={{ headerShown: false }}
+      />
+
+      {/* Add other screens that are NOT in the bottom tabs here */}
+      <Stack.Screen
+        name="UserProfileScreen"
+        component={UserProfileScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

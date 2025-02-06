@@ -41,13 +41,12 @@ const RentalScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               category={item.category}
               size={item.size}
               rentalPrice={item.rentalPrice}/>
-
           </TouchableOpacity>
   
         )}
         keyExtractor={(item, index) => index.toString()}
         numColumns={2}
-        columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 10 }}/>
+        columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 10, paddingTop: 20 }}/>
     </SafeAreaView>
   );
 };

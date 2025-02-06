@@ -15,15 +15,20 @@ import ClosetCard from '@/components/ClosetCard';
 import { LISTING_ITEMS } from '@/constants/MockData';
 import { SAMPLE_USERS } from '@/constants/MockData';
 
-const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const [myCloset] = useState(LISTING_ITEMS);
-  const [mainUser] = useState(SAMPLE_USERS[0]);
+const UserProfileScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, route }) => {
+  const { userData } = route.params || {};
+  const [userCloset] = useState(LISTING_ITEMS);
 
   return (
     <SafeAreaView style={styles.container}>
+
       {/* -- Header -- */}
       <View style={styles.headerContainer}>
-        <View style={styles.leftPlaceholder} />
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={28} color="#000" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Profile</Text>
         <TouchableOpacity style={styles.headerIconButton}>
           <Ionicons name="settings-outline" size={24} color="#000" />
@@ -42,29 +47,29 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             <Image
               style={styles.avatar}
               source={{
-                uri: mainUser.profileImage,
+                uri: userData.profileImage,
               }}
             />
           </View>
 
           {/* Name and Bio */}
-          <Text style={styles.userName}>{mainUser.name}</Text>
-          <Text style={styles.userBio}>{mainUser.bio}</Text>
+          <Text style={styles.userName}>{userData.name}</Text>
+          <Text style={styles.userBio}>{userData.bio}</Text>
 
           {/* Stats Row */}
           <View style={styles.statsContainer}>
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{mainUser.followers}</Text>
+              <Text style={styles.statNumber}>{userData.followers}</Text>
               <Text style={styles.statLabel}>Followers</Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{mainUser.following}</Text>
+              <Text style={styles.statNumber}>{userData.following}</Text>
               <Text style={styles.statLabel}>Following</Text>
             </View>
             <View style={styles.statItem}>
               <View style={styles.ratingRow}>
                 <Ionicons name="star" size={16} color="#FF6211" />
-                <Text style={styles.ratingText}>{mainUser.userRating}</Text>
+                <Text style={styles.ratingText}>{userData.userRating}</Text>
               </View>
               <Text style={styles.statLabel}>Rating</Text>
             </View>
@@ -77,7 +82,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         {/* -- Closet Section -- */}
         <Text style={styles.closetTitle}>My Closet</Text>
         <FlatList
-        data={myCloset.filter(item => item.listerId === 'user0')}
+        data={userCloset.filter(item => item.listerId === userData.userId)}
         renderItem={({ item, index }) => (
           <TouchableOpacity
             style={{ width: '48%' }}
@@ -100,22 +105,11 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 10 }}/>
 
       </ScrollView>
-
-      {/* -- Floating "Add Listing" Button -- */}
-      <TouchableOpacity
-        style={styles.addListingButton}
-        onPress={() => {
-          // Handle "Add Listing"
-        }}
-      >
-        <Ionicons name="add-circle-outline" size={24} color="#fff" style={{ marginRight: 8 }} />
-        <Text style={styles.addListingText}>Add Listing</Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 };
 
-export default ProfileScreen;
+export default UserProfileScreen;
 
 /* --- Styles --- */
 const styles = StyleSheet.create({
@@ -144,6 +138,9 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   headerIconButton: {
+    padding: 8,
+  },
+  backButton: {
     padding: 8,
   },
 

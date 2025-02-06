@@ -77,14 +77,20 @@ export default function ListingScreen({ route }) {
           {/* User Card Section */}
           <View style={styles.listerContainer}>
             <Text style={styles.listerHeader}>Listed By</Text>
-            <UserCard 
-                userId={user.userId}
-                name={user.name}
-                username={user.username}
-                profileImage={user.profileImage}
-                reviews={user.reviews}
-                userRating={user.userRating}
-                responseRate={user.responseRate}/>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('UserProfileScreen', { userData: user });
+              }}>
+                <UserCard 
+                  userId={user.userId}
+                  name={user.name}
+                  username={user.username}
+                  profileImage={user.profileImage}
+                  reviews={user.reviews}
+                  userRating={user.userRating}
+                  responseRate={user.responseRate}/>
+                </TouchableOpacity>
+
           </View>
 
           {/* Description Section */}
