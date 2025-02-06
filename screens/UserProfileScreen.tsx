@@ -21,7 +21,6 @@ const UserProfileScreen: React.FC<{ navigation: any, route: any }> = ({ navigati
 
   return (
     <SafeAreaView style={styles.container}>
-
       {/* -- Header -- */}
       <View style={styles.headerContainer}>
         <TouchableOpacity 
@@ -29,82 +28,71 @@ const UserProfileScreen: React.FC<{ navigation: any, route: any }> = ({ navigati
           onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={28} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Profile</Text>
-        <TouchableOpacity style={styles.headerIconButton}>
-          <Ionicons name="settings-outline" size={24} color="#000" />
-        </TouchableOpacity>
+        <Text style={styles.headerTitle}>{userData.name}'s Profile</Text>
+        <View style={{ width: 28 }} /> {/* Placeholder for alignment */}
       </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollViewContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* -- Profile Info Section -- */}
-        <View style={styles.profileInfoContainer}>
-          {/* Avatar */}
-          <View style={styles.avatarContainer}>
-            <Image
-              style={styles.avatar}
-              source={{
-                uri: userData.profileImage,
-              }}
-            />
-          </View>
-
-          {/* Name and Bio */}
-          <Text style={styles.userName}>{userData.name}</Text>
-          <Text style={styles.userBio}>{userData.bio}</Text>
-
-          {/* Stats Row */}
-          <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{userData.followers}</Text>
-              <Text style={styles.statLabel}>Followers</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{userData.following}</Text>
-              <Text style={styles.statLabel}>Following</Text>
-            </View>
-            <View style={styles.statItem}>
-              <View style={styles.ratingRow}>
-                <Ionicons name="star" size={16} color="#FF6211" />
-                <Text style={styles.ratingText}>{userData.userRating}</Text>
-              </View>
-              <Text style={styles.statLabel}>Rating</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* -- Divider -- */}
-        <View style={styles.divider} />
-
-        {/* -- Closet Section -- */}
-        <Text style={styles.closetTitle}>My Closet</Text>
-        <FlatList
+      {/* Use FlatList for the Entire Screen */}
+      <FlatList
         data={userCloset.filter(item => item.listerId === userData.userId)}
+        keyExtractor={(item, index) => index.toString()}
+        numColumns={2}
+        columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 10 }}
+        ListHeaderComponent={(
+          <>
+            {/* -- Profile Info Section -- */}
+            <View style={styles.profileInfoContainer}>
+              {/* Avatar */}
+              <View style={styles.avatarContainer}>
+                <Image style={styles.avatar} source={{ uri: userData.profileImage }} />
+              </View>
+
+              {/* Name and Bio */}
+              <Text style={styles.userName}>{userData.name}</Text>
+              <Text style={styles.userBio}>{userData.bio}</Text>
+
+              {/* Stats Row */}
+              <View style={styles.statsContainer}>
+                <View style={styles.statItem}>
+                  <Text style={styles.statNumber}>{userData.followers}</Text>
+                  <Text style={styles.statLabel}>Followers</Text>
+                </View>
+                <View style={styles.statItem}>
+                  <Text style={styles.statNumber}>{userData.following}</Text>
+                  <Text style={styles.statLabel}>Following</Text>
+                </View>
+                <View style={styles.statItem}>
+                  <View style={styles.ratingRow}>
+                    <Ionicons name="star" size={16} color="#FF6211" />
+                    <Text style={styles.ratingText}>{userData.userRating}</Text>
+                  </View>
+                  <Text style={styles.statLabel}>Rating</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* -- Divider -- */}
+            <View style={styles.divider} />
+
+            {/* -- Closet Section Title -- */}
+            <Text style={styles.closetTitle}>My Closet</Text>
+          </>
+        )}
         renderItem={({ item, index }) => (
           <TouchableOpacity
             style={{ width: '48%' }}
             key={index}
-                      onPress={() => {
-                        navigation.navigate('Listing', { listingData: item });
-                      }}>
+            onPress={() => navigation.navigate('Listing', { listingData: item })}>
             <ClosetCard
-            imageUrl={item.imageUrl}
-            listing={item.listing}
-            category={item.category}
-            size={item.size}
-            rentalPrice={item.rentalPrice}/>
-
+              imageUrl={item.imageUrl}
+              listing={item.listing}
+              category={item.category}
+              size={item.size}
+              rentalPrice={item.rentalPrice}
+            />
           </TouchableOpacity>
-  
         )}
-        keyExtractor={(cardData, index) => index.toString()}
-        numColumns={2}
-        columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 10 }}/>
-
-      </ScrollView>
+      />
     </SafeAreaView>
   );
 };

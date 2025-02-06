@@ -30,76 +30,67 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollViewContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* -- Profile Info Section -- */}
-        <View style={styles.profileInfoContainer}>
-          {/* Avatar */}
-          <View style={styles.avatarContainer}>
-            <Image
-              style={styles.avatar}
-              source={{
-                uri: mainUser.profileImage,
-              }}
-            />
-          </View>
-
-          {/* Name and Bio */}
-          <Text style={styles.userName}>{mainUser.name}</Text>
-          <Text style={styles.userBio}>{mainUser.bio}</Text>
-
-          {/* Stats Row */}
-          <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{mainUser.followers}</Text>
-              <Text style={styles.statLabel}>Followers</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{mainUser.following}</Text>
-              <Text style={styles.statLabel}>Following</Text>
-            </View>
-            <View style={styles.statItem}>
-              <View style={styles.ratingRow}>
-                <Ionicons name="star" size={16} color="#FF6211" />
-                <Text style={styles.ratingText}>{mainUser.userRating}</Text>
-              </View>
-              <Text style={styles.statLabel}>Rating</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* -- Divider -- */}
-        <View style={styles.divider} />
-
-        {/* -- Closet Section -- */}
-        <Text style={styles.closetTitle}>My Closet</Text>
-        <FlatList
+      {/* Use FlatList for the Entire Screen */}
+      <FlatList
         data={myCloset.filter(item => item.listerId === 'user0')}
+        keyExtractor={(item, index) => index.toString()}
+        numColumns={2}
+        columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 10 }}
+        ListHeaderComponent={(
+          <>
+            {/* -- Profile Info Section -- */}
+            <View style={styles.profileInfoContainer}>
+              {/* Avatar */}
+              <View style={styles.avatarContainer}>
+                <Image style={styles.avatar} source={{ uri: mainUser.profileImage }} />
+              </View>
+
+              {/* Name and Bio */}
+              <Text style={styles.userName}>{mainUser.name}</Text>
+              <Text style={styles.userBio}>{mainUser.bio}</Text>
+
+              {/* Stats Row */}
+              <View style={styles.statsContainer}>
+                <View style={styles.statItem}>
+                  <Text style={styles.statNumber}>{mainUser.followers}</Text>
+                  <Text style={styles.statLabel}>Followers</Text>
+                </View>
+                <View style={styles.statItem}>
+                  <Text style={styles.statNumber}>{mainUser.following}</Text>
+                  <Text style={styles.statLabel}>Following</Text>
+                </View>
+                <View style={styles.statItem}>
+                  <View style={styles.ratingRow}>
+                    <Ionicons name="star" size={16} color="#FF6211" />
+                    <Text style={styles.ratingText}>{mainUser.userRating}</Text>
+                  </View>
+                  <Text style={styles.statLabel}>Rating</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* -- Divider -- */}
+            <View style={styles.divider} />
+
+            {/* -- Closet Section Title -- */}
+            <Text style={styles.closetTitle}>My Closet</Text>
+          </>
+        )}
         renderItem={({ item, index }) => (
           <TouchableOpacity
             style={{ width: '48%' }}
             key={index}
-                      onPress={() => {
-                        navigation.navigate('Listing', { listingData: item });
-                      }}>
+            onPress={() => navigation.navigate('Listing', { listingData: item })}>
             <ClosetCard
-            imageUrl={item.imageUrl}
-            listing={item.listing}
-            category={item.category}
-            size={item.size}
-            rentalPrice={item.rentalPrice}/>
-
+              imageUrl={item.imageUrl}
+              listing={item.listing}
+              category={item.category}
+              size={item.size}
+              rentalPrice={item.rentalPrice}
+            />
           </TouchableOpacity>
-  
         )}
-        keyExtractor={(cardData, index) => index.toString()}
-        numColumns={2}
-        columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 10 }}/>
-
-      </ScrollView>
+      />
 
       {/* -- Floating "Add Listing" Button -- */}
       <TouchableOpacity

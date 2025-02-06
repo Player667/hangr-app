@@ -17,7 +17,7 @@ export const LISTING_ITEMS = [
     description: "This is a fantastic item that will elevate your style to the next level. Crafted from the finest materials, this piece combines both comfort and fashion. Whether youre going out with friends or attending a formal, this is the perfect choice for any occasion."
   },
   {
-    listerId: 'user2',
+    listerId: 'user0',
     imageUrl: 'https://images.unsplash.com/photo-1609840170480-4c440bcd5d8f?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     listing: 'Ralph Lauren Suit',
     category: 'Gray Suit',
@@ -29,7 +29,7 @@ export const LISTING_ITEMS = [
     description: "Elevate your style with this impeccably tailored three-piece gray plaid suit, perfect for making a bold yet sophisticated statement. Crafted from premium fabric, the suit features a slim-fit blazer, matching waistcoat, and tapered trousers that highlight a modern silhouette while ensuring all-day comfort. The subtle plaid pattern adds a touch of classic elegance, while the crisp white dress shirt and brown textured tie create a refined contrast. Finished with polished brown leather oxford shoes and a sleek timepiece, this ensemble is ideal for formal events, business meetings, or upscale gatherings."
   },
   {
-    listerId: 'user3',
+    listerId: 'user0',
     imageUrl: 'https://images.unsplash.com/photo-1720800835432-36f9f10e78b3?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     listing: 'Chanel Tweed Blazer',
     category: 'Blazer',
