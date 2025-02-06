@@ -12,7 +12,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { LISTING_ITEMS } from '@/constants/MockData';
 import ClosetCard from '@/components/ClosetCard';
 
-const RentalScreen: React.FC = () => {
+const RentalScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [myRentals] = useState(LISTING_ITEMS);
   return (
     <SafeAreaView style={styles.container}>
@@ -28,18 +28,26 @@ const RentalScreen: React.FC = () => {
       {/* 2‐Column Rental Items List */}
       <FlatList
         data={myRentals}
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
+          <TouchableOpacity
+            style={{ width: '48%' }}
+            key={index}
+                      onPress={() => {
+                        navigation.navigate('Listing', { listingData: item });
+                      }}>
             <ClosetCard
-            imageUrl={item.imageUrl}
-            listing={item.listing}
-            category={item.category}
-            size={item.size}
-            rentalPrice={item.rentalPrice}/>
+              imageUrl={item.imageUrl}
+              listing={item.listing}
+              category={item.category}
+              size={item.size}
+              rentalPrice={item.rentalPrice}/>
+
+          </TouchableOpacity>
   
         )}
         keyExtractor={(item, index) => index.toString()}
         numColumns={2}
-        columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 8 }}/>
+        columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 10 }}/>
     </SafeAreaView>
   );
 };

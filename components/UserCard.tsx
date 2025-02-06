@@ -12,6 +12,10 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 interface User {
   userId: string;   
   name: string;
+  email: string;
+  followers: number;
+  following: number;
+  bio: string;
   username: string;
   profileImage: string;
   reviews: number;
@@ -26,6 +30,10 @@ interface UserProps extends User {
 const UserCard: React.FC<UserProps> = ({
   userId,
   name,
+  email,
+  followers,
+  following,
+  bio,
   username,
   profileImage,
   reviews,
@@ -33,6 +41,7 @@ const UserCard: React.FC<UserProps> = ({
   responseRate,
   style,
 }) => {
+  console.log('Profile Image Source:', profileImage);
 
   return (
     <View style={styles.cardContainer}>

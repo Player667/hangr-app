@@ -12,7 +12,7 @@ import Card from '@/components/Card';
 import { LISTING_ITEMS } from '@/constants/MockData';
 
 
-const SavedScreen: React.FC = () => {
+const SavedScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   // Initialize the savedItems array (this would come from a higher-level state or localStorage in a real app)
   const [savedItems] = useState(LISTING_ITEMS);
 
@@ -36,19 +36,25 @@ const SavedScreen: React.FC = () => {
       >
         {savedItems && savedItems.length > 0 ? (
           savedItems.map((cardData, index) => (
-            <Card
-            imageUrl={cardData.imageUrl}
-            listing={cardData.listing}
-            category={cardData.category}
-            rentalPrice={cardData.rentalPrice}
-            retailPrice={cardData.retailPrice}
-            size={cardData.size}
-            rating={cardData.rating}
-            ratingCount={cardData.ratingCount}
-            description={cardData.description}
-            listerId={cardData.listerId}
-            style={index === 0 ? { marginTop: 20 } : {}}
+            <TouchableOpacity
+            key={index}
+            onPress={() => {
+              navigation.navigate('Listing', { listingData: cardData });
+            }}>
+              <Card
+                imageUrl={cardData.imageUrl}
+                listing={cardData.listing}
+                category={cardData.category}
+                rentalPrice={cardData.rentalPrice}
+                retailPrice={cardData.retailPrice}
+                size={cardData.size}
+                rating={cardData.rating}
+                ratingCount={cardData.ratingCount}
+                description={cardData.description}
+                listerId={cardData.listerId}
+                style={index === 0 ? { marginTop: 20 } : {}}
               />
+            </TouchableOpacity>
           ))
         ) : (
           <View style={styles.noSavedContainer}>

@@ -43,7 +43,7 @@ export default ClosetCard;
 /* --- Styles --- */
 const styles = StyleSheet.create({
   clothesCard: {
-    width: '48%', 
+    width: '100%', 
     marginBottom: 16,
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   },
   listingText: {
     fontSize: 17,
-    fontWeight: '600',
+    fontWeight: '500',
     color: '#333',
   },
   categoryText: {
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   },
   priceText: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '600',
     color: '#000',
   },
 });

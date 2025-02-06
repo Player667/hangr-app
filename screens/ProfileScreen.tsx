@@ -4,6 +4,7 @@ import {
   View,
   Text,
   StyleSheet,
+  FlatList,
   ScrollView,
   Image,
   TouchableOpacity,
@@ -12,9 +13,11 @@ import { LinearGradient } from 'expo-linear-gradient'; // Import LinearGradient 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ClosetCard from '@/components/ClosetCard';
 import { LISTING_ITEMS } from '@/constants/MockData';
+import { SAMPLE_USERS } from '@/constants/MockData';
 
-const ProfileScreen: React.FC = () => {
+const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [myCloset] = useState(LISTING_ITEMS);
+  const [mainUser] = useState(SAMPLE_USERS[0]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -39,31 +42,29 @@ const ProfileScreen: React.FC = () => {
             <Image
               style={styles.avatar}
               source={{
-                uri: 'https://images.unsplash.com/photo-1517849845537-4d257902454a',
+                uri: mainUser.profileImage,
               }}
             />
           </View>
 
           {/* Name and Bio */}
-          <Text style={styles.userName}>John Smith</Text>
-          <Text style={styles.userBio}>
-            Fashion enthusiast. Traveler. Lover of unique architecture & design.
-          </Text>
+          <Text style={styles.userName}>{mainUser.name}</Text>
+          <Text style={styles.userBio}>{mainUser.bio}</Text>
 
           {/* Stats Row */}
           <View style={styles.statsContainer}>
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>350</Text>
+              <Text style={styles.statNumber}>{mainUser.followers}</Text>
               <Text style={styles.statLabel}>Followers</Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>120</Text>
+              <Text style={styles.statNumber}>{mainUser.following}</Text>
               <Text style={styles.statLabel}>Following</Text>
             </View>
             <View style={styles.statItem}>
               <View style={styles.ratingRow}>
                 <Ionicons name="star" size={16} color="#FF6211" />
-                <Text style={styles.ratingText}>4.9</Text>
+                <Text style={styles.ratingText}>{mainUser.userRating}</Text>
               </View>
               <Text style={styles.statLabel}>Rating</Text>
             </View>
@@ -75,17 +76,29 @@ const ProfileScreen: React.FC = () => {
 
         {/* -- Closet Section -- */}
         <Text style={styles.closetTitle}>My Closet</Text>
-        <View style={styles.gridContainer}>
-          {myCloset.map((cardData) => (
+        <FlatList
+        data={myCloset.filter(item => item.listerId === 'user0')}
+        renderItem={({ item, index }) => (
+          <TouchableOpacity
+            style={{ width: '48%' }}
+            key={index}
+                      onPress={() => {
+                        navigation.navigate('Listing', { listingData: item });
+                      }}>
             <ClosetCard
-              imageUrl={cardData.imageUrl}
-              listing={cardData.listing}
-              category={cardData.category}
-              size={cardData.size}
-              rentalPrice={cardData.rentalPrice}
-            />
-          ))}
-        </View>
+            imageUrl={item.imageUrl}
+            listing={item.listing}
+            category={item.category}
+            size={item.size}
+            rentalPrice={item.rentalPrice}/>
+
+          </TouchableOpacity>
+  
+        )}
+        keyExtractor={(cardData, index) => index.toString()}
+        numColumns={2}
+        columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 10 }}/>
+
       </ScrollView>
 
       {/* -- Floating "Add Listing" Button -- */}
@@ -95,15 +108,8 @@ const ProfileScreen: React.FC = () => {
           // Handle "Add Listing"
         }}
       >
-        <LinearGradient
-                    colors={['#F00', '#FFC422']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.gradientButton}
-                  >
-                        <Ionicons name="add-circle-outline" size={24} color="#fff" style={{ marginRight: 8 }} />
-                        <Text style={styles.addListingText}>Add Listing</Text>
-        </LinearGradient>
+        <Ionicons name="add-circle-outline" size={24} color="#fff" style={{ marginRight: 8 }} />
+        <Text style={styles.addListingText}>Add Listing</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -255,8 +261,11 @@ const styles = StyleSheet.create({
 
   /* Floating Button */
   addListingButton: {
-    position: 'absolute',
+    flexDirection: 'row',
     alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    position: 'absolute',
     justifyContent: 'center',
     bottom: 30,
     alignSelf: 'center',

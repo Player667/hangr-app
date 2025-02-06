@@ -136,20 +136,20 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   listingText: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '500',
     color: '#000',
   },
   categoryText: {
     fontSize: 16,
     color: '#666',
-    marginTop: 5,
+    marginTop: 2,
   },
   bottomRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 5,
+    marginTop: 7,
   },
   priceText: {
     fontSize: 16,
@@ -162,8 +162,8 @@ const styles = StyleSheet.create({
   },
   ratingText: {
     marginLeft: 4,
-    fontSize: 18,
+    fontSize: 16,
     color: '#000',
-    fontWeight: '500',
+    fontWeight: '400',
   },
 });

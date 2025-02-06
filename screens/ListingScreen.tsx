@@ -30,17 +30,17 @@ export default function ListingScreen({ route }) {
 
     // Push Full Stars
     for (let i = 0; i < fullStars; i++) {
-      starsArray.push(<Ionicons key={`full-${i}`} name="star" size={20} color="#FFA500" />);
+      starsArray.push(<Ionicons key={`full-${i}`} name="star" size={20} color="#FF6211" />);
     }
 
     // Push Half Star (if applicable)
     if (halfStar) {
-      starsArray.push(<Ionicons key="half" name="star-half" size={20} color="#FFA500" />);
+      starsArray.push(<Ionicons key="half" name="star-half" size={20} color="#FF6211" />);
     }
 
     // Push Empty Stars
     for (let i = 0; i < emptyStars; i++) {
-      starsArray.push(<Ionicons key={`empty-${i}`} name="star-outline" size={20} color="#FFA500" />);
+      starsArray.push(<Ionicons key={`empty-${i}`} name="star-outline" size={20} color="#FF6211" />);
     }
 
     return starsArray;
@@ -105,14 +105,7 @@ export default function ListingScreen({ route }) {
 
         {/* Request Button */}
         <TouchableOpacity style={styles.requestButton}>
-          <LinearGradient
-            colors={['#F00', '#FFC422']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.gradientButton}
-          >
             <Text style={styles.requestButtonText}>Request</Text>
-          </LinearGradient>
         </TouchableOpacity>
       </View>
     </View>
@@ -233,8 +226,17 @@ const styles = StyleSheet.create({
     color: '#888',
   },
   requestButton: {
-    borderRadius: 20,
-    overflow: 'hidden', // Ensures the gradient stays inside the button
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 30,
+    marginRight: 15,
+    justifyContent: 'center',
+    alignSelf: 'center',
+    backgroundColor: '#FF6211',
+    borderRadius: 30,
+    shadowColor: '#000',
+    elevation: 6,
+    zIndex: 5,
   },
   gradientButton: {
     paddingVertical: 12,

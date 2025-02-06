@@ -100,8 +100,7 @@ const ExploreScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             key={index}
             onPress={() => {
               navigation.navigate('Listing', { listingData: cardData });
-            }}
-          >
+            }}>
               <Card
                 imageUrl={cardData.imageUrl}
                 listing={cardData.listing}
