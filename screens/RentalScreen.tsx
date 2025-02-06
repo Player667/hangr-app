@@ -13,7 +13,7 @@ import { LISTING_ITEMS } from '@/constants/MockData';
 import RentalCard from '@/components/RentalCard';
 
 const RentalScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const [myRentals] = useState(LISTING_ITEMS);
+  const [myRentals] = useState(LISTING_ITEMS.filter(item => item.listerId !== 'user0'));
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}

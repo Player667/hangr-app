@@ -32,7 +32,7 @@ const FILTERS: FilterItem[] = [
 const HEADER_HEIGHT = 110;
 
 const ExploreScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const [mockListings] = useState(LISTING_ITEMS);
+  const [mockListings] = useState(LISTING_ITEMS.filter(item => item.listerId !== 'user0'));
   const [selectedFilter, setSelectedFilter] = useState<string>('');
 
   return (

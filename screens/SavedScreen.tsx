@@ -14,7 +14,8 @@ import { LISTING_ITEMS } from '@/constants/MockData';
 
 const SavedScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   // Initialize the savedItems array (this would come from a higher-level state or localStorage in a real app)
-  const [savedItems] = useState(LISTING_ITEMS);
+  const [savedItems] = useState(LISTING_ITEMS.filter(item => item.listerId !== 'user0'));
+
 
 
   return (
