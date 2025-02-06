@@ -135,7 +135,7 @@ export const SAMPLE_USERS = [
     followers: 69,
     following: 690,
     bio: 'My butt hole quivers at the sight of black men.',
-    username: '@gay.fag.69',
+    username: '@gay.boy.69',
     profileImage: 'https://i.pinimg.com/736x/6e/da/25/6eda251c8069ca80231fac522127bbf4.jpg',
     reviews: 15,
     userRating: 0.69,

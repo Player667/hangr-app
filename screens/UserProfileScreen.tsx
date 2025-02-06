@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 20,
     fontWeight: '700',
-    color: '#000',
+    color: '#333',
   },
   headerIconButton: {
     padding: 8,

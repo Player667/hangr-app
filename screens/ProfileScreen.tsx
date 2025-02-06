@@ -47,6 +47,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
               {/* Name and Bio */}
               <Text style={styles.userName}>{mainUser.name}</Text>
+              <Text style={styles.userHandle}>{mainUser.username}</Text>
               <Text style={styles.userBio}>{mainUser.bio}</Text>
 
               {/* Stats Row */}
@@ -95,9 +96,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       {/* -- Floating "Add Listing" Button -- */}
       <TouchableOpacity
         style={styles.addListingButton}
-        onPress={() => {
-          // Handle "Add Listing"
-        }}
+        onPress={() => navigation.navigate('AddListingScreen')}
       >
         <Ionicons name="add-circle-outline" size={24} color="#fff" style={{ marginRight: 8 }} />
         <Text style={styles.addListingText}>Add Listing</Text>
@@ -175,6 +174,11 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '700',
     color: '#000',
+  },
+  userHandle: {
+    marginTop: 3,
+    fontSize: 17,
+    color: '#666',
   },
   userBio: {
     marginTop: 8,

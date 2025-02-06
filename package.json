@@ -51,7 +51,8 @@
     "react-native-web": "~0.19.13",
     "react-native-webview": "13.12.5",
     "styled-components": "^6.1.13",
-    "expo-linear-gradient": "~14.0.2"
+    "expo-linear-gradient": "~14.0.2",
+    "expo-image-picker": "~16.0.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
