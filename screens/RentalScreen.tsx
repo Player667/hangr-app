@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { LISTING_ITEMS } from '@/constants/MockData';
-import ClosetCard from '@/components/ClosetCard';
+import RentalCard from '@/components/RentalCard';
 
 const RentalScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [myRentals] = useState(LISTING_ITEMS);
@@ -35,7 +35,7 @@ const RentalScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                       onPress={() => {
                         navigation.navigate('Listing', { listingData: item });
                       }}>
-            <ClosetCard
+            <RentalCard
               imageUrl={item.imageUrl}
               listing={item.listing}
               category={item.category}
@@ -46,7 +46,8 @@ const RentalScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         )}
         keyExtractor={(item, index) => index.toString()}
         numColumns={2}
-        columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 10, paddingTop: 20 }}/>
+        columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 10, paddingTop: 0 }}
+        contentContainerStyle={{ paddingTop: 20 }}/>
     </SafeAreaView>
   );
 };

@@ -22,6 +22,9 @@ const ClosetCard: React.FC<CardProps> = ({
     <View style={styles.clothesCard}>
       <View style={styles.imageContainer}>
         <Image source={{ uri: imageUrl }} style={styles.image} />
+        <TouchableOpacity style={styles.overlayIconContainer}>
+          <Ionicons name="calendar-outline" size={20} color="#fff"/>
+        </TouchableOpacity>
       </View>
       <View style={styles.textContainer}>
         <Text style={styles.listingText}
