@@ -101,7 +101,7 @@ export const LISTING_ITEMS = [
     description: "This Balenciaga oversized hoodie combines streetwear edge with high-fashion comfort. Ideal for casual days out or cozy nights in, it brings a bold, effortless vibe to any look."
   },
   {
-    listerId: 'user9',
+    listerId: 'user0',
     imageUrl: 'https://images.unsplash.com/photo-1584386450584-c6d766612a45?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     listing: 'Nike Air Force 1 Sneakers',
     category: 'Footwear',

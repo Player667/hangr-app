@@ -112,7 +112,8 @@ const ExploreScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 ratingCount={cardData.ratingCount}
                 description={cardData.description}
                 listerId={cardData.listerId}
-                style={index === 0 ? { marginTop: 20 } : {}}
+                /* Fix using device height. 20 for Akshay, 40 for Aryan */
+                style={index === 0 ? { marginTop: 40 } : {}}
               />
             </TouchableOpacity>
           ))}

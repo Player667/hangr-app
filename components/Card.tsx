@@ -5,6 +5,8 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
+  StyleProp,
+  ViewStyle
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -23,17 +25,7 @@ interface Listing {
 }
 
 export interface CardProps extends Listing {
-  imageUrl: string;
-  listing: string;
-  category: string;
-  size: string;
-  rentalPrice: number;
-  retailPrice: number;
-  rating: number;
-  ratingCount: number;
-  description: string;
-  listerId: string;
-  style?: object;  
+  style?: StyleProp<ViewStyle>;
 }
 
 const Card: React.FC<CardProps> = ({
@@ -42,11 +34,8 @@ const Card: React.FC<CardProps> = ({
   category,
   size,
   rentalPrice,
-  retailPrice,
   rating,
   ratingCount,
-  description,
-  listerId,
   style,
 }) => {
   // Manage saved items using state
@@ -54,40 +43,47 @@ const Card: React.FC<CardProps> = ({
 
   const handleHeartPress = () => {
     setIsLiked(!isLiked);
-
     if (!isLiked) {
-      // Like Functionality
-      
+      // Like functionality
     } else {
-      
+      // Unlike functionality
     }
   };
 
   return (
     <View style={[styles.cardContainer, style]}>
-      <View style={styles.imageContainer}>
-        <Image source={{ uri: imageUrl }} style={styles.cardImage} />
-        <TouchableOpacity
-          style={styles.heartIconContainer}
-          onPress={handleHeartPress}
-        >
-          <Ionicons
-            name={isLiked ? 'heart' : 'heart-outline'}
-            size={20}
-            color={isLiked ? '#FF6211' : '#fff'}
-          />
-        </TouchableOpacity>
-      </View>
+      {/* Image Section */}
+      <Image source={{ uri: imageUrl }} style={styles.cardImage} />
 
-      {/* Text Content */}
-      <View style={styles.textContainer}>
-        <Text style={styles.listingText}>{listing}</Text>
-        <Text style={styles.categoryText}>{category}</Text>
+      {/* Heart Icon on top-right */}
+      <TouchableOpacity
+        style={styles.heartIconContainer}
+        onPress={handleHeartPress}
+      >
+        <Ionicons
+          name={isLiked ? 'heart' : 'heart-outline'}
+          size={20}
+          color={isLiked ? '#FF6211' : '#fff'}
+        />
+      </TouchableOpacity>
+
+      {/* Transparent overlay for text content */}
+      <View style={styles.overlay}>
+        <Text style={styles.listingText} numberOfLines={1}>
+          {listing}
+        </Text>
+        <Text style={styles.categoryText}>
+          {category} • {size}
+        </Text>
+
         <View style={styles.bottomRow}>
-          <Text style={styles.priceText}>${rentalPrice} / Day</Text>
+          <Text style={styles.priceText}>
+            ${rentalPrice} <Text style={styles.perDay}>/ Day</Text>
+          </Text>
+
           <View style={styles.ratingContainer}>
             <Ionicons name="star" size={18} color="#FF6211" />
-            <Text style={styles.ratingText}>{rating.toFixed(2)}</Text>
+            <Text style={styles.ratingText}>{rating.toFixed(1)}</Text>
           </View>
         </View>
       </View>
@@ -97,8 +93,6 @@ const Card: React.FC<CardProps> = ({
 
 export default Card;
 
-
-/* --- Styles --- */
 const styles = StyleSheet.create({
   cardContainer: {
     marginTop: 10,
@@ -106,21 +100,18 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     backgroundColor: '#fff',
     borderRadius: 16,
+    overflow: 'hidden',
+
+    // Shadow / Elevation
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 5,
     elevation: 2,
   },
-  imageContainer: {
-    position: 'relative',
-    alignItems: 'center',
-  },
   cardImage: {
     width: '100%',
-    height: 275,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    aspectRatio: 4 / 4, // Maintain a consistent aspect ratio
     resizeMode: 'cover',
   },
   heartIconContainer: {
@@ -130,31 +121,48 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.35)',
     borderRadius: 20,
     padding: 6,
+    zIndex: 2, // Ensure the heart icon is above the overlay
   },
-  textContainer: {
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+  overlay: {
+    // Position the overlay absolutely on top of the image
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+
+    // Semi-transparent background
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+
+    // Place content at the bottom
+    justifyContent: 'flex-end',
+    padding: 14,
   },
   listingText: {
     fontSize: 18,
-    fontWeight: '500',
-    color: '#000',
+    fontWeight: '600',
+    color: '#fff',
+    marginBottom: 3,
   },
   categoryText: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 2,
+    fontSize: 14,
+    fontWeight: '400',
+    color: '#fff',
+    marginBottom: 8,
   },
   bottomRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 7,
   },
   priceText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000',
+    color: '#fff',
+  },
+  perDay: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#fff',
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -163,7 +171,7 @@ const styles = StyleSheet.create({
   ratingText: {
     marginLeft: 4,
     fontSize: 16,
-    color: '#000',
-    fontWeight: '400',
+    color: '#fff',
+    fontWeight: '500',
   },
 });

@@ -9,27 +9,57 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { CardProps } from './Card';
 
-
 const ClosetCard: React.FC<CardProps> = ({
   imageUrl,
   listing,
   category,
   size,
   rentalPrice,
+  rating,
 }) => {
+  // Example like/unlike state
+  const [isLiked, setIsLiked] = useState(false);
+
+  const handleHeartPress = () => {
+    setIsLiked(!isLiked);
+  };
 
   return (
-    <View style={styles.clothesCard}>
+    <View style={styles.cardContainer}>
+      {/* Image Section */}
       <View style={styles.imageContainer}>
-        <Image source={{ uri: imageUrl }} style={styles.image} />
+        <Image source={{ uri: imageUrl }} style={styles.cardImage} />
+
+        {/* Heart icon (top-right) */}
+        <TouchableOpacity
+          style={styles.heartIconContainer}
+          onPress={handleHeartPress}
+        >
+          <Ionicons
+            name={isLiked ? 'heart' : 'heart-outline'}
+            size={20}
+            color={isLiked ? '#FF6211' : '#fff'}
+          />
+        </TouchableOpacity>
       </View>
+
+      {/* Semi-transparent overlay for text */}
       <View style={styles.textContainer}>
-        <Text style={styles.listingText}
-        numberOfLines={1}
-        ellipsizeMode="tail">{listing}</Text>
-        <Text style={styles.categoryText}>{category}</Text>
-        <Text style={styles.sizeText}>{size}</Text>
-        <Text style={styles.priceText}>${rentalPrice} / Day</Text>
+        <Text style={styles.listingText} numberOfLines={1}>{listing}</Text>
+        <Text style={styles.categoryText}>{category} • {size}</Text>
+
+        {/* Bottom Row with Price & Rating (if available) */}
+        <View style={styles.bottomRow}>
+          <Text style={styles.priceText}>
+            ${rentalPrice} <Text style={styles.perDay}>/ Day</Text>
+          </Text>
+          {rating !== undefined && (
+            <View style={styles.ratingContainer}>
+              <Ionicons name="star" size={18} color="#FF6211" />
+              <Text style={styles.ratingText}>{rating.toFixed(1)}</Text>
+            </View>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -37,62 +67,86 @@ const ClosetCard: React.FC<CardProps> = ({
 
 export default ClosetCard;
 
-/* --- Styles --- */
 const styles = StyleSheet.create({
-  clothesCard: {
-    width: '100%', 
-    marginBottom: 16,
+  cardContainer: {
+    // You can remove width/height if you want the layout to be fluid in a parent container.
+    // The key is the aspectRatio in imageContainer.
+    width: '100%',
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 20,
+
+    // Shadow / Elevation
     backgroundColor: '#fff',
-    borderRadius: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowRadius: 5,
+    elevation: 3,
   },
   imageContainer: {
-    position: 'relative',
+    // 6/4 aspect ratio => 1.5
     width: '100%',
-    aspectRatio: 1,
+    aspectRatio: 4 / 4,   // This controls the image area height relative to width
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
     overflow: 'hidden',
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-    backgroundColor: '#f0f0f0',
   },
-  image: {
+  cardImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
+    resizeMode: 'cover', // Ensures the image covers the area properly
   },
-  overlayIconContainer: {
+  heartIconContainer: {
     position: 'absolute',
     top: 8,
     right: 8,
     backgroundColor: 'rgba(0,0,0,0.4)',
+    borderRadius: 20,
     padding: 6,
-    borderRadius: 16,
   },
   textContainer: {
-    padding: 8,
+    // The overlay behind the text
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    padding: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)', // 0.4 opacity
   },
   listingText: {
-    fontSize: 17,
-    fontWeight: '500',
-    color: '#333',
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 2,
   },
   categoryText: {
     fontSize: 13,
-    color: '#333',
-    marginVertical: 2,
+    color: '#ddd',
   },
-  sizeText: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 4,
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 6,
   },
   priceText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
-    color: '#000',
+    color: '#fff',
+  },
+  perDay: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: '#ddd',
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  ratingText: {
+    marginLeft: 4,
+    fontSize: 14,
+    color: '#fff',
+    fontWeight: '500',
   },
 });

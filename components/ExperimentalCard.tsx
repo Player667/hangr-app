@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 16,
     overflow: 'hidden',
-    marginBottom: 20,
+    marginBottom: 15,
 
     // Shadow / Elevation
     backgroundColor: '#fff',

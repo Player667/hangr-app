@@ -1,3 +1,4 @@
+import Colors from '@/constants/Colors';
 import React, { useState } from 'react';
 import {
   View,
@@ -146,5 +147,6 @@ const styles = StyleSheet.create({
   },
   starIcon: {
     marginLeft: 4,
+    color: Colors.primary,
   },
 });

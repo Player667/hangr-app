@@ -36,6 +36,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         keyExtractor={(item, index) => index.toString()}
         numColumns={2}
         columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 10 }}
+        contentContainerStyle={{ paddingBottom: 80 }} 
         ListHeaderComponent={(
           <>
             {/* -- Profile Info Section -- */}
@@ -137,13 +138,7 @@ const styles = StyleSheet.create({
     padding: 8,
   },
 
-  /* ScrollView */
-  scrollView: {
-    flex: 1,
-  },
-  scrollViewContent: {
-    paddingBottom: 80,
-  },
+
 
   /* Profile Info */
   profileInfoContainer: {
@@ -251,7 +246,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginHorizontal: 16,
+    marginHorizontal: 0,
   },
 
   /* Floating Button */
