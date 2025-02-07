@@ -85,6 +85,18 @@ export default function ListingScreen({ route }) {
         <Ionicons name="arrow-back-outline" size={28} color="#fff" />
       </TouchableOpacity>
 
+      * Collapsing Image Header (Animated)
+      <Animated.View style={[styles.header, { height: headerHeight }]}>
+        <Animated.Image
+          source={{ uri: listingData.imageUrl }}
+          style={[
+            styles.headerImage,
+            {
+              transform: [{ translateY: imageTranslate }],
+            },
+          ]}
+        />
+      </Animated.View>
 
       {/* The content that scrolls */}
       <Animated.ScrollView
@@ -170,7 +182,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     overflow: 'hidden', 
-    zIndex: 2, // Ensure it's behind the back button but above scroll
+    zIndex: 0, // Ensure it's behind the back button but above scroll
   },
   headerImage: {
     width: '100%',
