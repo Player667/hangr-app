@@ -90,21 +90,13 @@ const styles = StyleSheet.create({
     height: '100%',
     resizeMode: 'cover', // Ensures the image covers the area properly
   },
-  heartIconContainer: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    borderRadius: 20,
-    padding: 6,
-  },
   textContainer: {
     // The overlay behind the text
     position: 'absolute',
     bottom: 0,
     width: '100%',
     padding: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)', // 0.4 opacity
+    backgroundColor: 'rgba(0, 0, 0, 0.2)', // 0.4 opacity
   },
   listingText: {
     fontSize: 16,

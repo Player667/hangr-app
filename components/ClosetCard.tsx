@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: '100%',
     padding: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)', // 0.4 opacity
+    backgroundColor: 'rgba(0, 0, 0, 0.3)', // 0.4 opacity
   },
   listingText: {
     fontSize: 16,
