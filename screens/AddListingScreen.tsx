@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   SafeAreaView,
   View,
@@ -8,16 +8,27 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  Dimensions,
   KeyboardAvoidingView,
   Keyboard,
-  Platform,
+  Platform
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import DropDownPicker from 'react-native-dropdown-picker';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { LinearGradient } from 'expo-linear-gradient'; // For a subtle gradient background
+
+// Import your ClosetCard to preview the listing
+import ClosetCard from '@/components/ClosetCard'; 
+// Adjust the import path as necessary
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 const AddListingScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const [image, setImage] = useState<string | null>(null);
+  // Images state (up to 6)
+  const [images, setImages] = useState<string[]>([]);
+
+  // Listing details
   const [productName, setProductName] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
@@ -30,7 +41,22 @@ const AddListingScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [sizeOpen, setSizeOpen] = useState(false);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
-  // Detect keyboard state
+  // Horizontal paging
+  const scrollRef = useRef<ScrollView>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+
+  // Validation error states
+  const [errors, setErrors] = useState({
+    images: false,
+    productName: false,
+    description: false,
+    category: false,
+    size: false,
+    rentalPrice: false,
+    retailPrice: false,
+  });
+
+  // Listen for keyboard show/hide to close dropdowns
   useEffect(() => {
     const showListener = Keyboard.addListener('keyboardDidShow', () => {
       setKeyboardVisible(true);
@@ -47,9 +73,11 @@ const AddListingScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     };
   }, []);
 
-  // Image picker
+  // Image picker (for the next slot only)
   const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
+    if (images.length >= 6) return; // limit to 6
+
+    const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: false,
       aspect: [9, 16],
@@ -57,151 +85,392 @@ const AddListingScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      const newUri = result.assets[0].uri;
+      setImages((prev) => [...prev, newUri]);
+
+      // Clear any previous "no images" error
+      if (errors.images) {
+        setErrors((prev) => ({ ...prev, images: false }));
+      }
     }
   };
 
+  // Validate all required fields on Page 2
+  const validatePage2 = () => {
+    const newErrors = {
+      images: errors.images, // We don't re-check images here, that's for page 1
+      productName: !productName.trim(),
+      description: !description.trim(),
+      category: !category,
+      size: !size,
+      rentalPrice: !rentalPrice.trim(),
+      retailPrice: !retailPrice.trim(),
+    };
+
+    setErrors(newErrors);
+
+    // Return true if no errors
+    return !Object.values(newErrors).some((err) => err === true);
+  };
+
+  // Switch pages
+  const handleNextPage = () => {
+    if (currentPage === 0) {
+      // Validate Page 1: at least 1 image
+      if (images.length === 0) {
+        setErrors((prev) => ({ ...prev, images: true }));
+        return;
+      }
+    } else if (currentPage === 1) {
+      // Validate Page 2
+      if (!validatePage2()) {
+        return;
+      }
+    }
+
+    // If validation passes, move on
+    const nextIndex = currentPage + 1;
+    scrollRef.current?.scrollTo({ x: nextIndex * SCREEN_WIDTH, animated: true });
+    setCurrentPage(nextIndex);
+  };
+
+  // Go back or close
+  const handlePrevPage = () => {
+    if (currentPage === 0) {
+      navigation.goBack();
+    } else {
+      const prevIndex = currentPage - 1;
+      scrollRef.current?.scrollTo({ x: prevIndex * SCREEN_WIDTH, animated: true });
+      setCurrentPage(prevIndex);
+    }
+  };
+
+  // Track scroll to update page indicator
+  const handleMomentumScrollEnd = (e: any) => {
+    const offsetX = e.nativeEvent.contentOffset.x;
+    const pageIndex = Math.round(offsetX / SCREEN_WIDTH);
+    setCurrentPage(pageIndex);
+  };
+
+  // Final submission
+  const handleListItem = () => {
+    // TODO: handle uploading data, etc.
+    navigation.navigate('MainTabs', { screen: 'Profile' });
+  };
+
+  // We'll show 6 squares at once, and only let the user add images in order
+  const imageSlots = [0, 1, 2, 3, 4, 5];
+
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header with Back Button */}
-      <View style={styles.headerContainer}>
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={28} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>List an Item</Text>
-        <View style={{ width: 28 }} /> {/* Placeholder for alignment */}
-      </View>
-
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-      >
-        <ScrollView contentContainerStyle={styles.scrollView}>
-          <TouchableOpacity style={styles.imageUpload} onPress={pickImage}>
-            {image ? (
-              <Image source={{ uri: image }} style={styles.image} />
-            ) : (
-              <Ionicons name="camera" size={40} color="#999" />
-            )}
+    <LinearGradient
+      colors={['#ffffff', '#f8f9fc']} // subtle gradient
+      style={{ flex: 1 }}
+    >
+      <SafeAreaView style={styles.safeArea}>
+        {/* Header */}
+        <View style={styles.headerContainer}>
+          <TouchableOpacity style={styles.backButton} onPress={handlePrevPage}>
+            <Ionicons name="arrow-back" size={26} color="#000" />
           </TouchableOpacity>
-          <Text style={styles.label}>Add a Picture</Text>
+          <Text style={styles.headerTitle}>
+            {currentPage === 0
+              ? 'Add Images'
+              : currentPage === 1
+              ? 'Item Details'
+              : 'Preview'}
+          </Text>
+          <View style={styles.leftPlaceholder} />
+        </View>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Product Name"
-            placeholderTextColor="#666"
-            value={productName}
-            onChangeText={setProductName}
+        {/* Step Indicator (3 circles) */}
+        <View style={styles.stepIndicatorContainer}>
+          <View
+            style={[
+              styles.stepCircle,
+              { backgroundColor: currentPage === 0 ? '#FF6211' : '#E0E0E0' },
+            ]}
           />
-
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            placeholder="Product Description"
-            placeholderTextColor="#666"
-            value={description}
-            onChangeText={setDescription}
-            multiline
-            textAlignVertical="top"
-            onBlur={() => setDescription(description.trim() === '' ? '' : description)} // Clears spaces on blur
+          <View style={styles.stepLine} />
+          <View
+            style={[
+              styles.stepCircle,
+              { backgroundColor: currentPage === 1 ? '#FF6211' : '#E0E0E0' },
+            ]}
           />
+          <View style={styles.stepLine} />
+          <View
+            style={[
+              styles.stepCircle,
+              { backgroundColor: currentPage === 2 ? '#FF6211' : '#E0E0E0' },
+            ]}
+          />
+        </View>
 
-          {/* Category Dropdown - Pushes Other Fields Down */}
-          <View style={{ marginBottom: categoryOpen ? 150 : 0 }}>
-            <DropDownPicker
-              open={categoryOpen}
-              value={category}
-              items={[
-                { label: 'Dresses', value: 'dresses' },
-                { label: 'Suits', value: 'suits' },
-                { label: 'Shoes', value: 'shoes' },
-                { label: 'Accessories', value: 'accessories' }
-              ]}
-              setOpen={setCategoryOpen}
-              setValue={setCategory}
-              placeholder="Select Category"
-              style={styles.dropdown}
-              dropDownContainerStyle={styles.dropDownContainer}
-              disabled={isKeyboardVisible} // Disable dropdown when keyboard is visible
-              placeholderStyle={styles.dropDownPlaceholder}
-            />
+        {/* HORIZONTAL PAGES */}
+        <ScrollView
+          ref={scrollRef}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          scrollEnabled={false}
+          onMomentumScrollEnd={handleMomentumScrollEnd}
+          style={{ flex: 1 }}
+        >
+          {/* ---------- PAGE 1: IMAGES ---------- */}
+          <View style={[styles.horizontalPageContainer, { width: SCREEN_WIDTH }]}>
+            <View style={{ flex: 1 }}>
+              <ScrollView contentContainerStyle={styles.pageContent}>
+                <Text style={styles.pageSubtitle}>Upload up to 6 Images</Text>
+
+                {/* All 6 squares at once */}
+                <View style={styles.imagesContainer}>
+                  {imageSlots.map((idx) => {
+                    if (images[idx]) {
+                      // If this slot already has an image
+                      return (
+                        <View style={styles.imageWrapper} key={idx}>
+                          <Image
+                            source={{ uri: images[idx] }}
+                            style={styles.uploadedImage}
+                          />
+                        </View>
+                      );
+                    } else if (idx === images.length) {
+                      // This slot is the "next" slot => clickable add button
+                      return (
+                        <TouchableOpacity
+                          key={idx}
+                          style={[
+                            styles.addImageBox,
+                            errors.images && images.length === 0 && idx === 0
+                              ? styles.errorBorder
+                              : null,
+                          ]}
+                          onPress={pickImage}
+                        >
+                          <Ionicons name="add-circle-outline" size={42} color="#aaa" />
+                        </TouchableOpacity>
+                      );
+                    } else {
+                      // idx > images.length => locked/disabled placeholder
+                      return (
+                        <View style={[styles.lockedBox]} key={idx}>
+                          <Ionicons
+                            Ionicons name="add-circle-outline" size={42} 
+                            color="#bbb"
+                            style={{ opacity: 0.6 }}
+                          />
+                        </View>
+                      );
+                    }
+                  })}
+                </View>
+              </ScrollView>
+            </View>
+
+            {/* Next button at the bottom */}
+            <View style={styles.bottomButtonContainer}>
+              <TouchableOpacity style={styles.button} onPress={handleNextPage}>
+                <Text style={styles.buttonText}>Next</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
-          {/* Size Dropdown - Pushes Other Fields Down */}
-          <View style={{ marginBottom: sizeOpen ? 190 : 0 }}>
-            <DropDownPicker
-              open={sizeOpen}
-              value={size}
-              items={[
-                { label: 'XS', value: 'XS' },
-                { label: 'S', value: 'S' },
-                { label: 'M', value: 'M' },
-                { label: 'L', value: 'L' },
-                { label: 'XL', value: 'XL' }
-              ]}
-              setOpen={setSizeOpen}
-              setValue={setSize}
-              placeholder="Select Size"
-              style={styles.dropdown}
-              dropDownContainerStyle={styles.dropDownContainer}
-              disabled={isKeyboardVisible} // Disable dropdown when keyboard is visible
-              placeholderStyle={styles.dropDownPlaceholder}
-            />
+          {/* ---------- PAGE 2: DETAILS ---------- */}
+          <View style={[styles.horizontalPageContainer, { width: SCREEN_WIDTH }]}>
+            <KeyboardAvoidingView
+              style={{ flex: 1 }}
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            >
+              <ScrollView
+                contentContainerStyle={styles.pageContent}
+                showsVerticalScrollIndicator={false}
+              >
+                <TextInput
+                  style={[
+                    styles.input,
+                    errors.productName && styles.errorBorder,
+                  ]}
+                  placeholder="Product Name"
+                  placeholderTextColor="#666"
+                  value={productName}
+                  onChangeText={(text) => {
+                    setProductName(text);
+                    if (errors.productName && text.trim()) {
+                      setErrors((prev) => ({ ...prev, productName: false }));
+                    }
+                  }}
+                />
+
+                <TextInput
+                  style={[
+                    styles.input,
+                    styles.textArea,
+                    errors.description && styles.errorBorder,
+                  ]}
+                  placeholder="Product Description"
+                  placeholderTextColor="#666"
+                  value={description}
+                  onChangeText={(text) => {
+                    setDescription(text);
+                    if (errors.description && text.trim()) {
+                      setErrors((prev) => ({ ...prev, description: false }));
+                    }
+                  }}
+                  multiline
+                  textAlignVertical="top"
+                />
+
+                {/* Category */}
+                <View style={{ marginBottom: categoryOpen ? 160 : 12 }}>
+                  <DropDownPicker
+                    open={categoryOpen}
+                    value={category}
+                    items={[
+                      { label: 'Dresses', value: 'dresses' },
+                      { label: 'Suits', value: 'suits' },
+                      { label: 'Shoes', value: 'shoes' },
+                      { label: 'Accessories', value: 'accessories' },
+                    ]}
+                    setOpen={setCategoryOpen}
+                    setValue={(val) => {
+                      setCategory(val);
+                      if (errors.category && val) {
+                        setErrors((prev) => ({ ...prev, category: false }));
+                      }
+                    }}
+                    placeholder="Select Category"
+                    style={[
+                      styles.dropdown,
+                      errors.category && styles.errorBorder,
+                    ]}
+                    dropDownContainerStyle={styles.dropDownContainer}
+                    placeholderStyle={styles.dropDownPlaceholder}
+                    disabled={isKeyboardVisible}
+                  />
+                </View>
+
+                {/* Size */}
+                <View style={{ marginBottom: sizeOpen ? 160 : 12 }}>
+                  <DropDownPicker
+                    open={sizeOpen}
+                    value={size}
+                    items={[
+                      { label: 'XS', value: 'XS' },
+                      { label: 'S', value: 'S' },
+                      { label: 'M', value: 'M' },
+                      { label: 'L', value: 'L' },
+                      { label: 'XL', value: 'XL' },
+                    ]}
+                    setOpen={setSizeOpen}
+                    setValue={(val) => {
+                      setSize(val);
+                      if (errors.size && val) {
+                        setErrors((prev) => ({ ...prev, size: false }));
+                      }
+                    }}
+                    placeholder="Select Size"
+                    style={[styles.dropdown, errors.size && styles.errorBorder]}
+                    dropDownContainerStyle={styles.dropDownContainer}
+                    placeholderStyle={styles.dropDownPlaceholder}
+                    disabled={isKeyboardVisible}
+                  />
+                </View>
+
+                {/* Rental Price */}
+                <TextInput
+                  style={[
+                    styles.input,
+                    errors.rentalPrice && styles.errorBorder,
+                  ]}
+                  placeholder="Rental Price ($)"
+                  placeholderTextColor="#666"
+                  keyboardType="numeric"
+                  value={rentalPrice}
+                  onChangeText={(text) => {
+                    const formatted = text.replace(/[^0-9.]/g, '');
+                    const value = formatted ? `$${formatted}` : '';
+                    setRentalPrice(value);
+                    if (errors.rentalPrice && value.trim()) {
+                      setErrors((prev) => ({ ...prev, rentalPrice: false }));
+                    }
+                  }}
+                />
+
+                {/* Retail Price */}
+                <TextInput
+                  style={[
+                    styles.input,
+                    errors.retailPrice && styles.errorBorder,
+                  ]}
+                  placeholder="Retail Price ($)"
+                  placeholderTextColor="#666"
+                  keyboardType="numeric"
+                  value={retailPrice}
+                  onChangeText={(text) => {
+                    const formatted = text.replace(/[^0-9.]/g, '');
+                    const value = formatted ? `$${formatted}` : '';
+                    setRetailPrice(value);
+                    if (errors.retailPrice && value.trim()) {
+                      setErrors((prev) => ({ ...prev, retailPrice: false }));
+                    }
+                  }}
+                />
+              </ScrollView>
+
+              <View style={styles.bottomButtonContainer}>
+                <TouchableOpacity style={styles.button} onPress={handleNextPage}>
+                  <Text style={styles.buttonText}>Next</Text>
+                </TouchableOpacity>
+              </View>
+            </KeyboardAvoidingView>
           </View>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Rental Price ($)"
-            placeholderTextColor="#666"
-            keyboardType="numeric"
-            value={rentalPrice}
-            onChangeText={(text) => {
-              // Remove any non-numeric characters except decimal points
-              let formattedText = text.replace(/[^0-9.]/g, '');
-              setRentalPrice(formattedText ? `$${formattedText}` : '');
-              }}
-          />
+          {/* ---------- PAGE 3: PREVIEW ---------- */}
+          <View style={[styles.horizontalPageContainer, { width: SCREEN_WIDTH }]}>
+            <View style={{ flex: 1 }}>
+              <ScrollView contentContainerStyle={styles.pageContent}>
+                <Text style={styles.pageSubtitle}>Preview Your Listing</Text>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Retail Price ($)"
-            placeholderTextColor="#666"
-            keyboardType="numeric"
-            value={retailPrice}
-            onChangeText={(text) => {
-              let formattedText = text.replace(/[^0-9.]/g, '');
-              setRetailPrice(formattedText ? `$${formattedText}` : '');
-            }}
-          />
-
+                <View style={{ marginTop: 20 }}>
+                  <ClosetCard
+                    imageUrl={images[0] || 'https://via.placeholder.com/400x400?text=No+Image'}
+                    listing={productName || 'Untitled Listing'}
+                    category={category || 'Uncategorized'}
+                    size={size || '—'}
+                    rentalPrice={parseFloat(rentalPrice.replace(/\D/g, '')) || 0}
+                    rating={0}
+                  />
+                </View>
+              </ScrollView>
+            </View>
+            <View style={styles.bottomButtonContainer}>
+              <TouchableOpacity style={styles.button} onPress={handleListItem}>
+                <Text style={styles.buttonText}>List Item</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </ScrollView>
-      </KeyboardAvoidingView>
-
-      {/* LIST BUTTON FIXED AT BOTTOM */}
-      <TouchableOpacity
-        style={[styles.listButton]} 
-        onPress={() => navigation.navigate('MainTabs', { screen: 'Profile' })}
-      >
-        <Text style={styles.listButtonText}>List Item</Text>
-      </TouchableOpacity>
-    </SafeAreaView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 };
 
 export default AddListingScreen;
 
+/* ---------- STYLES ---------- */
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    backgroundColor: '#F8F9FB',
   },
+  /* Header */
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8F9FB',
+    backgroundColor: 'transparent',
     paddingHorizontal: 16,
-    paddingVertical: 20,
+    paddingTop: 10,
+    paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E5E5',
   },
@@ -211,55 +480,168 @@ const styles = StyleSheet.create({
   headerTitle: {
     flex: 1,
     textAlign: 'center',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
     color: '#333',
   },
-  scrollView: {
-    padding: 20,
-    paddingBottom: 120,
-    top: 20
+  leftPlaceholder: {
+    width: 40,
   },
-  imageUpload: {
-    width: 120,
-    height: 213,
-    backgroundColor: '#E5E5E5',
-    borderRadius: 10,
+
+  /* Step Indicator */
+  stepIndicatorContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    alignSelf: 'center',
+    marginVertical: 12,
   },
-  image: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 10,
+  stepCircle: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
   },
-  label: {
-    textAlign: 'center',
+  stepLine: {
+    width: 40,
+    height: 3,
+    backgroundColor: '#E0E0E0',
+    marginHorizontal: 8,
+    borderRadius: 2,
+  },
+
+  /* Pages */
+  horizontalPageContainer: {
+    flex: 1,
+    flexDirection: 'column',
+  },
+  pageContent: {
+    padding: 20,
+  },
+  pageSubtitle: {
     fontSize: 16,
+    fontWeight: '600',
     color: '#333',
-    marginTop: 10,
+    textAlign: 'center',
+    marginBottom: 20,
   },
+
+  /* Bottom Button */
+  bottomButtonContainer: {
+    padding: 20,
+  },
+  button: {
+    backgroundColor: '#FF6211',
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+
+  /* IMAGES PAGE */
+  imagesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    paddingHorizontal: 10,
+    gap: 10,
+  },
+  imageWrapper: {
+    height: '30%',
+    width: '30%',
+    aspectRatio: 1,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 10,
+    backgroundColor: '#E5E5E5',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.07,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  uploadedImage: {
+    width: '100%',
+    aspectRatio: 1,
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  addImageBox: {
+    height: '30%',
+    width: '30%',
+    aspectRatio: 1,
+    borderRadius: 12,
+    marginBottom: 20,
+    backgroundColor: '#F0F0F0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    // borderWidth: 2,
+    // borderColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.07,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  lockedBox: {
+    height: '30%',
+    width: '30%',
+    aspectRatio: 1,
+    borderRadius: 12,
+    marginBottom: 10,
+    backgroundColor: '#DDD',
+    justifyContent: 'center',
+    alignItems: 'center',
+    // Maybe a subtle border or different color to signify locked
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  errorBorder: {
+    borderColor: 'red',
+  },
+
+  /* DETAILS PAGE */
   input: {
     backgroundColor: '#fff',
     padding: 14,
-    borderRadius: 8,
+    borderRadius: 10,
     fontSize: 16,
-    marginTop: 10,
+    marginTop: 12,
     borderWidth: 1,
     borderColor: '#ddd',
     color: '#000',
+    // Subtle shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
   },
   textArea: {
-    minHeight: 90, // Bigger text box
-    maxHeight: 200, // Prevents it from growing infinitely
+    minHeight: 90,
+    maxHeight: 200,
   },
   dropdown: {
-    marginTop: 10,
+    marginTop: 12,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#ddd',
     backgroundColor: '#fff',
+    // Subtle shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
   },
   dropDownContainer: {
     borderWidth: 1,
@@ -271,20 +653,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
   },
-  listButton: {
-    backgroundColor: '#FF6211',
-    padding: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'absolute',
-    bottom: 40,
-    left: 20,
-    right: 20,
-    borderRadius: 10,
-  },
-  listButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '700',
-  },
 });
+

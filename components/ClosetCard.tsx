@@ -50,15 +50,14 @@ const ClosetCard: React.FC<CardProps> = ({
 
         {/* Bottom Row with Price & Rating (if available) */}
         <View style={styles.bottomRow}>
-          <Text style={styles.priceText}>
+          {/* <Text style={styles.priceText}>
             ${rentalPrice} <Text style={styles.perDay}>/ Day</Text>
-          </Text>
-          {rating !== undefined && (
+          </Text> */}
+          {typeof rating === 'number' && !isNaN(rating) && (
             <View style={styles.ratingContainer}>
-              <Ionicons name="star" size={18} color="#FF6211" />
-              <Text style={styles.ratingText}>{rating.toFixed(1)}</Text>
-            </View>
-          )}
+                <Ionicons name="star" size={18} color="#FF6211" />
+                <Text style={styles.ratingText}>{rating.toFixed(1)}</Text>
+            </View> )}
         </View>
       </View>
     </View>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   SafeAreaView,
   View,
@@ -12,12 +12,9 @@ import {
   Pressable,
   PanResponder,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient'; // Import LinearGradient for button styling
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ClosetCard from '@/components/ClosetCard';
-import { LISTING_ITEMS } from '@/constants/MockData';
-import { SAMPLE_USERS } from '@/constants/MockData';
-import { useNavigation } from '@react-navigation/native';
+import { LISTING_ITEMS, SAMPLE_USERS } from '@/constants/MockData';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -26,12 +23,10 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [mainUser] = useState(SAMPLE_USERS[0]);
 
   // Settings Bar
-
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuAnim = useRef(new Animated.Value(SCREEN_WIDTH)).current;
 
-  // Open Settings Menu
-  // Open Menu
+  // Open/Close Settings Menu
   const openMenu = () => {
     setIsMenuOpen(true);
     Animated.timing(menuAnim, {
@@ -40,8 +35,6 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       useNativeDriver: true,
     }).start();
   };
-
-  // Close Menu
   const closeMenu = () => {
     Animated.timing(menuAnim, {
       toValue: SCREEN_WIDTH,
@@ -50,7 +43,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     }).start(() => setIsMenuOpen(false));
   };
 
-  // Pan Responder for Swipe Gesture (Right to Left)
+  // Pan Responder (swiping menu)
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, gestureState) => Math.abs(gestureState.dx) > 10,
@@ -77,7 +70,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* -- Header -- */}
+      {/* Header */}
       <View style={styles.headerContainer}>
         <View style={styles.leftPlaceholder} />
         <Text style={styles.headerTitle}>Profile</Text>
@@ -86,22 +79,30 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Use FlatList for the Entire Screen */}
       <FlatList
-        data={myCloset.filter(item => item.listerId === 'user0')}
-        keyExtractor={(item, index) => index.toString()}
+        data={myCloset.filter((item) => item.listerId === 'user0')}
+        keyExtractor={(_, index) => index.toString()}
         numColumns={2}
         columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 10 }}
-        contentContainerStyle={{ paddingBottom: 80 }} 
-        ListHeaderComponent={(
+        contentContainerStyle={{ paddingBottom: 80 }}
+        ListHeaderComponent={
           <>
-            {/* -- Profile Info Section -- */}
+            {/* -- Profile Info -- */}
             <View style={styles.profileInfoContainer}>
-              {/* Avatar */}
-              <View style={styles.avatarContainer}>
-                <Image style={styles.avatar} source={{ uri: mainUser.profileImage }} />
-              </View>
+              {/* Avatar Wrapper (Ensures `+` button is not clipped) */}
+              <View style={styles.avatarWrapper}>
+                <View style={styles.avatarContainer}>
+                  <Image style={styles.avatar} source={{ uri: mainUser.profileImage }} />
+                </View>
 
+                {/* + Button overlapping bottom-right edge (outside clipping area) */}
+                <TouchableOpacity
+                  style={styles.addListingCircle}
+                  onPress={() => navigation.navigate('AddListingScreen')}
+                >
+                  <Ionicons name="add" size={22} color="#fff" />
+                </TouchableOpacity>
+              </View>
               {/* Name and Bio */}
               <Text style={styles.userName}>{mainUser.name}</Text>
               <Text style={styles.userHandle}>{mainUser.username}</Text>
@@ -127,18 +128,18 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               </View>
             </View>
 
-            {/* -- Divider -- */}
+            {/* Divider */}
             <View style={styles.divider} />
 
-            {/* -- Closet Section Title -- */}
+            {/* Closet Section Title */}
             <Text style={styles.closetTitle}>My Closet</Text>
           </>
-        )}
-        renderItem={({ item, index }) => (
+        }
+        renderItem={({ item }) => (
           <TouchableOpacity
             style={{ width: '48%' }}
-            key={index}
-            onPress={() => navigation.navigate('Listing', { listingData: item })}>
+            onPress={() => navigation.navigate('Listing', { listingData: item })}
+          >
             <ClosetCard
               imageUrl={item.imageUrl}
               listing={item.listing}
@@ -150,48 +151,35 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         )}
       />
 
-      {/* -- Floating "Add Listing" Button -- */}
-      <TouchableOpacity
-        style={styles.addListingButton}
-        onPress={() => navigation.navigate('AddListingScreen')}
-      >
-        <Ionicons name="add-circle-outline" size={24} color="#fff" style={{ marginRight: 8 }} />
-        <Text style={styles.addListingText}>Add Listing</Text>
-      </TouchableOpacity>
-
-
-      {/* Settings Overlay */}
+      {/* Overlay when Settings are open */}
       {isMenuOpen && <Pressable style={styles.overlay} onPress={closeMenu} />}
 
-      {/* Right-Side Sliding Menu */}
+      {/* Sliding Menu */}
       <Animated.View
         style={[styles.menuContainer, { transform: [{ translateX: menuAnim }] }]}
         {...panResponder.panHandlers}
       >
         <Text style={styles.menuTitle}>Settings</Text>
 
-        {/* Button 1 */}
+        {/* Example Menu Buttons */}
         <TouchableOpacity style={styles.menuButton}>
           <Ionicons name="person-outline" size={22} color="#000" />
           <Text style={styles.menuButtonText}>Button 1</Text>
         </TouchableOpacity>
         <View style={styles.menuDivider} />
 
-        {/* Button 2 */}
         <TouchableOpacity style={styles.menuButton}>
           <Ionicons name="notifications-outline" size={22} color="#000" />
           <Text style={styles.menuButtonText}>Button 2</Text>
         </TouchableOpacity>
         <View style={styles.menuDivider} />
 
-        {/* Button 3 */}
         <TouchableOpacity style={styles.menuButton}>
           <Ionicons name="settings-outline" size={22} color="#000" />
           <Text style={styles.menuButtonText}>Button 3</Text>
         </TouchableOpacity>
         <View style={styles.menuDivider} />
 
-        {/* Logout Button */}
         <TouchableOpacity style={styles.menuButton} onPress={handleLogout}>
           <Ionicons name="log-out-outline" size={22} color="#000" />
           <Text style={styles.menuButtonText}>Log Out</Text>
@@ -209,7 +197,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8F9FB',
   },
-  /* Header */
+  // Header
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -233,19 +221,29 @@ const styles = StyleSheet.create({
     padding: 8,
   },
 
-  /* Profile Info */
+  // Profile Info
   profileInfoContainer: {
     alignItems: 'center',
     marginTop: 24,
     paddingHorizontal: 16,
+    zIndex: 1,
   },
+ // Avatar Wrapper (Keeps add button outside)
+ avatarWrapper: {
+    position: 'relative',
+    width: 120,
+    height: 120,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Avatar (Cropped inside container)
   avatarContainer: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    overflow: 'hidden',
+    overflow: 'hidden', // Ensures avatar is circular and cropped
     backgroundColor: '#eee',
-    // Unified shadow
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.15,
@@ -256,6 +254,26 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
+  },
+  // + button at bottom-right edge
+  addListingCircle: {
+    position: 'absolute',
+    bottom: 0, // Keeps it at the bottom edge
+    right: 0,  // Moves it to the right edge
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#FF6211',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#fff', // White border to contrast with avatar
+    zIndex: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   userName: {
     marginTop: 16,
@@ -277,7 +295,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
 
-  /* Stats */
+  // Stats
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -286,7 +304,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     paddingVertical: 16,
-    // Subtle shadow
+    // Shadow
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -318,7 +336,7 @@ const styles = StyleSheet.create({
     color: '#000',
   },
 
-  /* Divider */
+  // Divider
   divider: {
     height: 1,
     width: '90%',
@@ -326,8 +344,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginVertical: 24,
   },
-
-  /* Closet Title */
   closetTitle: {
     marginBottom: 16,
     marginLeft: 16,
@@ -335,52 +351,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
   },
-  gridContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginHorizontal: 0,
-  },
 
-  /* Floating Button */
-  addListingButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    position: 'absolute',
-    justifyContent: 'center',
-    bottom: 30,
-    alignSelf: 'center', 
-    backgroundColor: '#FF6211',
-    borderRadius: 30,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 6,
-    zIndex: 5,
-  },
-  gradientButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-  },
-  addListingText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 20,
-  },
-
-  /* Settings Menu */
+  // Right-Side Sliding Menu
   menuContainer: {
     position: 'absolute',
     top: 0,
     right: -50,
     width: 350,
-    height: Dimensions.get('window').height, // Full height to overlap Add Listing button
+    height: Dimensions.get('window').height,
     backgroundColor: '#fff',
     paddingTop: 100,
     paddingHorizontal: 20,
@@ -390,36 +368,33 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
-    zIndex: 20, // Ensure it appears above everything
+    zIndex: 20,
   },
   menuTitle: {
-    fontSize: 22, // Slightly larger for better readability
-    fontWeight: '700', // Bolder for emphasis
-    textAlign: 'left', // Align text to left for a clean structure
+    fontSize: 22,
+    fontWeight: '700',
+    textAlign: 'left',
     color: '#000',
     marginBottom: 25,
-    paddingHorizontal: 10, // Adds slight padding to the title
+    paddingHorizontal: 10,
   },
- 
   menuButton: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 14,
-    paddingHorizontal: 0,
-    justifyContent: 'flex-start', // Align text/icons to the left
-    marginHorizontal: 10, // Align with the menu content
+    marginHorizontal: 10,
   },
   menuButtonText: {
     color: '#000',
     fontSize: 18,
-    fontWeight: '600', // Medium bold
+    fontWeight: '600',
     marginLeft: 10,
-    letterSpacing: 0.5, // Improves spacing for readability
-  },  
+    letterSpacing: 0.5,
+  },
   menuDivider: {
     height: 1,
-    backgroundColor: '#ddd', // Light gray divider
-    marginVertical: 0, // Space above and below the divider
+    backgroundColor: '#ddd',
+    marginVertical: 0,
     width: '100%',
   },
   overlay: {
