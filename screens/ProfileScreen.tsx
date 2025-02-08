@@ -1,23 +1,79 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   SafeAreaView,
   View,
   Text,
   StyleSheet,
   FlatList,
-  ScrollView,
   Image,
   TouchableOpacity,
+  Animated,
+  Dimensions,
+  Pressable,
+  PanResponder,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient'; // Import LinearGradient for button styling
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ClosetCard from '@/components/ClosetCard';
 import { LISTING_ITEMS } from '@/constants/MockData';
 import { SAMPLE_USERS } from '@/constants/MockData';
+import { useNavigation } from '@react-navigation/native';
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [myCloset] = useState(LISTING_ITEMS);
   const [mainUser] = useState(SAMPLE_USERS[0]);
+
+  // Settings Bar
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuAnim = useRef(new Animated.Value(SCREEN_WIDTH)).current;
+
+  // Open Settings Menu
+  // Open Menu
+  const openMenu = () => {
+    setIsMenuOpen(true);
+    Animated.timing(menuAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  // Close Menu
+  const closeMenu = () => {
+    Animated.timing(menuAnim, {
+      toValue: SCREEN_WIDTH,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => setIsMenuOpen(false));
+  };
+
+  // Pan Responder for Swipe Gesture (Right to Left)
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gestureState) => Math.abs(gestureState.dx) > 10,
+      onPanResponderMove: (_, gestureState) => {
+        if (gestureState.dx > -50) {
+          menuAnim.setValue(gestureState.dx);
+        }
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dx > 100) {
+          closeMenu();
+        } else {
+          openMenu();
+        }
+      },
+    })
+  ).current;
+
+  // Log Out Function
+  const handleLogout = () => {
+    closeMenu();
+    navigation.replace('Landing');
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -25,7 +81,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       <View style={styles.headerContainer}>
         <View style={styles.leftPlaceholder} />
         <Text style={styles.headerTitle}>Profile</Text>
-        <TouchableOpacity style={styles.headerIconButton}>
+        <TouchableOpacity style={styles.headerIconButton} onPress={openMenu}>
           <Ionicons name="settings-outline" size={24} color="#000" />
         </TouchableOpacity>
       </View>
@@ -102,6 +158,45 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <Ionicons name="add-circle-outline" size={24} color="#fff" style={{ marginRight: 8 }} />
         <Text style={styles.addListingText}>Add Listing</Text>
       </TouchableOpacity>
+
+
+      {/* Settings Overlay */}
+      {isMenuOpen && <Pressable style={styles.overlay} onPress={closeMenu} />}
+
+      {/* Right-Side Sliding Menu */}
+      <Animated.View
+        style={[styles.menuContainer, { transform: [{ translateX: menuAnim }] }]}
+        {...panResponder.panHandlers}
+      >
+        <Text style={styles.menuTitle}>Settings</Text>
+
+        {/* Button 1 */}
+        <TouchableOpacity style={styles.menuButton}>
+          <Ionicons name="person-outline" size={22} color="#000" />
+          <Text style={styles.menuButtonText}>Button 1</Text>
+        </TouchableOpacity>
+        <View style={styles.menuDivider} />
+
+        {/* Button 2 */}
+        <TouchableOpacity style={styles.menuButton}>
+          <Ionicons name="notifications-outline" size={22} color="#000" />
+          <Text style={styles.menuButtonText}>Button 2</Text>
+        </TouchableOpacity>
+        <View style={styles.menuDivider} />
+
+        {/* Button 3 */}
+        <TouchableOpacity style={styles.menuButton}>
+          <Ionicons name="settings-outline" size={22} color="#000" />
+          <Text style={styles.menuButtonText}>Button 3</Text>
+        </TouchableOpacity>
+        <View style={styles.menuDivider} />
+
+        {/* Logout Button */}
+        <TouchableOpacity style={styles.menuButton} onPress={handleLogout}>
+          <Ionicons name="log-out-outline" size={22} color="#000" />
+          <Text style={styles.menuButtonText}>Log Out</Text>
+        </TouchableOpacity>
+      </Animated.View>
     </SafeAreaView>
   );
 };
@@ -137,8 +232,6 @@ const styles = StyleSheet.create({
   headerIconButton: {
     padding: 8,
   },
-
-
 
   /* Profile Info */
   profileInfoContainer: {
@@ -279,5 +372,62 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '700',
     fontSize: 20,
+  },
+
+  /* Settings Menu */
+  menuContainer: {
+    position: 'absolute',
+    top: 0,
+    right: -50,
+    width: 350,
+    height: Dimensions.get('window').height, // Full height to overlap Add Listing button
+    backgroundColor: '#fff',
+    paddingTop: 100,
+    paddingHorizontal: 20,
+    paddingRight: 70,
+    shadowColor: '#000',
+    shadowOffset: { width: -2, height: 0 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+    zIndex: 20, // Ensure it appears above everything
+  },
+  menuTitle: {
+    fontSize: 22, // Slightly larger for better readability
+    fontWeight: '700', // Bolder for emphasis
+    textAlign: 'left', // Align text to left for a clean structure
+    color: '#000',
+    marginBottom: 25,
+    paddingHorizontal: 10, // Adds slight padding to the title
+  },
+ 
+  menuButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 0,
+    justifyContent: 'flex-start', // Align text/icons to the left
+    marginHorizontal: 10, // Align with the menu content
+  },
+  menuButtonText: {
+    color: '#000',
+    fontSize: 18,
+    fontWeight: '600', // Medium bold
+    marginLeft: 10,
+    letterSpacing: 0.5, // Improves spacing for readability
+  },  
+  menuDivider: {
+    height: 1,
+    backgroundColor: '#ddd', // Light gray divider
+    marginVertical: 0, // Space above and below the divider
+    width: '100%',
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0,0,0,0)',
   },
 });

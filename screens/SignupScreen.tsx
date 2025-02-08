@@ -5,10 +5,13 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import DropDownPicker from 'react-native-dropdown-picker';
 import Colors from '@/constants/Colors';
+import { useNavigation } from '@react-navigation/native';
 
 interface Props {}
 
 const SignupScreen: React.FC<Props> = () => {
+    const navigation = useNavigation();
+
   const [isEmailMode, setIsEmailMode] = useState(false);
 
   const [countryOpen, setCountryOpen] = useState(false);
@@ -40,10 +43,12 @@ const SignupScreen: React.FC<Props> = () => {
 
   const handleContinueWithPhone = () => {
     console.log('Continue with Phone:', countryValue, phoneNumber);
+    navigation.replace('MainTabs');
   };
 
   const handleContinueWithEmail = () => {
     console.log('Continue with Email:', email);
+    navigation.replace('MainTabs');
   };
 
   const handleContinueWithApple = () => {
@@ -69,7 +74,7 @@ const SignupScreen: React.FC<Props> = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.modalHeader}>
-        <TouchableOpacity onPress={() => console.log('Close modal')} style={styles.closeButton}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
           <Ionicons name="close" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Register</Text>

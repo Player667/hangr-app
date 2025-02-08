@@ -4,27 +4,26 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+import LandingScreen from '@/screens/LandingScreen'; // New Landing Page
 import ExploreScreen from '../screens/ExploreScreen';
 import SavedScreen from '../screens/SavedScreen';
 import RentalScreen from '../screens/RentalScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import MessagesScreen from '@/screens/Messages';
 import LoginScreen from '@/screens/LoginScreen';
-import ListingScreen from '@/screens/ListingScreen'; // Example of a non-tab screen
-import UserProfileScreen from '@/screens/UserProfileScreen'; // Example of a non-tab screen
-import AddListingScreen from '@/screens/AddListingScreen'; // Example of a non-tab screen
+import SignupScreen from '@/screens/SignupScreen';
+import ListingScreen from '@/screens/ListingScreen';
+import UserProfileScreen from '@/screens/UserProfileScreen';
+import AddListingScreen from '@/screens/AddListingScreen';
 import Colors from '@/constants/Colors';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
 export default function Layout() {
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  if (!isAuthenticated) {
-    return <LoginScreen />;
-  }
-
+  // Bottom Tab Navigator
   const BottomTabs = () => (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -59,28 +58,45 @@ export default function Layout() {
   );
 
   return (
-    <Stack.Navigator>
-      {/* The BottomTabs navigator is the main structure */}
+    <Stack.Navigator initialRouteName={isAuthenticated ? "MainTabs" : "Landing"}>
+      {/* Landing Screen - Shown if NOT Authenticated */}
+      <Stack.Screen
+        name="Landing"
+        component={LandingScreen}
+        options={{ headerShown: false }}
+      />
+
+      {/* Auth Screens */}
+      <Stack.Screen
+        name="Signup"
+        component={SignupScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Login"
+        component={LoginScreen}
+        options={{ headerShown: false }}
+      />
+
+      {/* Main App Navigation - Shown After Login */}
       <Stack.Screen
         name="MainTabs"
         component={BottomTabs}
         options={{ headerShown: false }}
       />
 
-      {/* Add other screens that are NOT in the bottom tabs here */}
+      {/* Additional Screens */}
       <Stack.Screen
         name="Listing"
         component={ListingScreen}
         options={{ headerShown: false }}
       />
-
       <Stack.Screen
         name="UserProfileScreen"
         component={UserProfileScreen}
         options={{ headerShown: false }}
       />
-
-<Stack.Screen
+      <Stack.Screen
         name="AddListingScreen"
         component={AddListingScreen}
         options={{ headerShown: false }}
@@ -89,6 +105,7 @@ export default function Layout() {
   );
 }
 
+// Styles
 const styles = StyleSheet.create({
   tabBar: {
     backgroundColor: '#ffffff',
