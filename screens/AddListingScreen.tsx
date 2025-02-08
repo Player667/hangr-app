@@ -387,6 +387,8 @@ const AddListingScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                   placeholderTextColor="#666"
                   keyboardType="numeric"
                   value={rentalPrice}
+                  returnKeyType="done"
+                  onSubmitEditing={() => Keyboard.dismiss()}
                   onChangeText={(text) => {
                     const formatted = text.replace(/[^0-9.]/g, '');
                     const value = formatted ? `$${formatted}` : '';
@@ -407,6 +409,8 @@ const AddListingScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                   placeholderTextColor="#666"
                   keyboardType="numeric"
                   value={retailPrice}
+                  returnKeyType="done"
+                  onSubmitEditing={() => Keyboard.dismiss()}
                   onChangeText={(text) => {
                     const formatted = text.replace(/[^0-9.]/g, '');
                     const value = formatted ? `$${formatted}` : '';
