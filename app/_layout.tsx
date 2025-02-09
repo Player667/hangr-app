@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, LogBox } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import LandingScreen from '@/screens/LandingScreen'; // New Landing Page
@@ -21,6 +21,10 @@ const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
 export default function Layout() {
+  // Hide Warnings on App
+  LogBox.ignoreAllLogs(true);
+
+
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Bottom Tab Navigator

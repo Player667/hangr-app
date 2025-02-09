@@ -130,13 +130,13 @@ export const LISTING_ITEMS = [
 export const SAMPLE_USERS = [
   {
     userId: 'user0',
-    name: 'Aryan Aneesh',
-    email: 'iloveboys@gmail.com',
-    followers: 100,
-    following: 69,
+    name: 'Johnny Apple',
+    email: 'johnnyapple@gmail.com',
+    followers: 54,
+    following: 62,
     bio: 'Avid Texas fan looking to get rent out some clothes in my wardrobe.',
     username: '@texas.fan77',
-    profileImage: 'https://randomuser.me/api/portraits/men/23.jpg',
+    profileImage: 'https://randomuser.me/api/portraits/men/60.jpg',
     reviews: 15,
     userRating: 4.8,
     responseRate: 99,
