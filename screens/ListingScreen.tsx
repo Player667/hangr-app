@@ -5,7 +5,7 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
-  Animated,     // <-- Important
+  Animated,
   Dimensions
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -15,9 +15,8 @@ import UserCard from '@/components/UserCard';
 
 const { width } = Dimensions.get('window');
 
-// You can tweak these for your desired effect
-const HEADER_MAX_HEIGHT = 550;  // The max height of the image
-const HEADER_MIN_HEIGHT = 100;  // The height when collapsed
+const HEADER_MAX_HEIGHT = 550; // The max height of the image
+const HEADER_MIN_HEIGHT = 100; // The height when collapsed
 const SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
 export default function ListingScreen({ route }) {
@@ -69,12 +68,12 @@ export default function ListingScreen({ route }) {
   });
 
   /**
-   * Optionally, for a parallax effect, you can move the image slightly
-   * This will slide the image up a bit as you scroll
+   * Optionally, for a parallax effect, you can move the image slightly.
+   * (Currently set to 0 for no shift.)
    */
   const imageTranslate = scrollY.interpolate({
     inputRange: [0, SCROLL_DISTANCE],
-    outputRange: [0, 0], // Move image up by 50px
+    outputRange: [0, 0],
     extrapolate: 'clamp',
   });
 
@@ -85,7 +84,7 @@ export default function ListingScreen({ route }) {
         <Ionicons name="arrow-back-outline" size={28} color="#fff" />
       </TouchableOpacity>
 
-      * Collapsing Image Header (Animated)
+      {/* Collapsing Image Header (Animated) */}
       <Animated.View style={[styles.header, { height: headerHeight }]}>
         <Animated.Image
           source={{ uri: listingData.imageUrl }}
@@ -157,13 +156,17 @@ export default function ListingScreen({ route }) {
 
       {/* Bottom Bar (Price + Request Button) */}
       <View style={styles.bottomBar}>
-        <View style={styles.priceContainer}>
-          <Text style={styles.priceText}>${listingData.rentalPrice} / Day</Text>
-          <Text style={styles.retailPrice}>Retail: ${listingData.retailPrice}</Text>
+        <View style={styles.bottomBarInner}>
+          {/* Price Section */}
+          <View style={styles.priceContainer}>
+            <Text style={styles.priceText}>${listingData.rentalPrice} / Day</Text>
+            <Text style={styles.retailPrice}>Retail: ${listingData.retailPrice}</Text>
+          </View>
+          {/* Request Button */}
+          <TouchableOpacity style={styles.requestButton}>
+            <Text style={styles.requestButtonText}>Request</Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.requestButton}>
-          <Text style={styles.requestButtonText}>Request</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -181,7 +184,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    overflow: 'hidden', 
+    overflow: 'hidden',
     zIndex: 0, // Ensure it's behind the back button but above scroll
   },
   headerImage: {
@@ -205,7 +208,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingHorizontal: 20,
     paddingVertical: 20,
-    // Additional spacing if needed
     minHeight: 550, // So there's enough scrolling content
   },
   title: {
@@ -246,7 +248,7 @@ const styles = StyleSheet.create({
   },
   descriptionContainer: {
     paddingVertical: 8,
-    paddingBottom: 100,
+    paddingBottom: 100, // ensures the content doesn't get hidden by the bottom bar
     zIndex: 2,
   },
   descriptionHeader: {
@@ -266,45 +268,52 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 100,
     backgroundColor: '#fff',
+    // Increase border radius and padding to create more space
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 16,
+    paddingBottom: 30, // extra bottom padding so it's less "scrunched"
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  bottomBarInner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderTopWidth: 2,
-    borderTopColor: '#E5E5E5',
-    paddingBottom: 30, // For home indicator
-    paddingHorizontal: 30,
-    zIndex: 5,
+    paddingHorizontal: 25,
   },
   priceContainer: {
     flexDirection: 'column',
+    maxWidth: '60%',
   },
   priceText: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#333',
-    paddingBottom: 5,
+    marginBottom: 2,
   },
   retailPrice: {
-    fontSize: 15,
+    fontSize: 14,
     color: '#888',
   },
   requestButton: {
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 30,
-    marginRight: 15,
-    justifyContent: 'center',
-    alignSelf: 'center',
     backgroundColor: '#FF6211',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
     borderRadius: 30,
     shadowColor: '#000',
-    elevation: 6,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   requestButtonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
   },
 });

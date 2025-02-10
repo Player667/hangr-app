@@ -43,12 +43,12 @@ const SignupScreen: React.FC<Props> = () => {
 
   const handleContinueWithPhone = () => {
     console.log('Continue with Phone:', countryValue, phoneNumber);
-    navigation.replace('MainTabs');
+    navigation.replace('CompleteProfile');
   };
 
   const handleContinueWithEmail = () => {
     console.log('Continue with Email:', email);
-    navigation.replace('MainTabs');
+    navigation.replace('CompleteProfile');
   };
 
   const handleContinueWithApple = () => {

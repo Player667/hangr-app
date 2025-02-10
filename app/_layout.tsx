@@ -16,6 +16,7 @@ import ListingScreen from '@/screens/ListingScreen';
 import UserProfileScreen from '@/screens/UserProfileScreen';
 import AddListingScreen from '@/screens/AddListingScreen';
 import Colors from '@/constants/Colors';
+import CompleteProfileScreen from '@/screens/CompleteProfileScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -79,6 +80,11 @@ export default function Layout() {
       <Stack.Screen
         name="Login"
         component={LoginScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="CompleteProfile" 
+        component={CompleteProfileScreen}
         options={{ headerShown: false }}
       />
 

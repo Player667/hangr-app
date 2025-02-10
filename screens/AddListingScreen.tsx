@@ -276,159 +276,174 @@ const AddListingScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             </View>
           </View>
 
-          {/* ---------- PAGE 2: DETAILS ---------- */}
-          <View style={[styles.horizontalPageContainer, { width: SCREEN_WIDTH }]}>
-            <KeyboardAvoidingView
-              style={{ flex: 1 }}
-              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        {/* ---------- PAGE 2: DETAILS ---------- */}
+        <View style={[styles.horizontalPageContainer, { width: SCREEN_WIDTH }]}>
+        <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+            <ScrollView
+            contentContainerStyle={styles.pageContent}
+            showsVerticalScrollIndicator={false}
             >
-              <ScrollView
-                contentContainerStyle={styles.pageContent}
-                showsVerticalScrollIndicator={false}
-              >
-                <TextInput
-                  style={[
-                    styles.input,
-                    errors.productName && styles.errorBorder,
-                  ]}
-                  placeholder="Product Name"
-                  placeholderTextColor="#666"
-                  value={productName}
-                  onChangeText={(text) => {
-                    setProductName(text);
-                    if (errors.productName && text.trim()) {
-                      setErrors((prev) => ({ ...prev, productName: false }));
+            <TextInput
+                style={[
+                styles.input,
+                errors.productName && styles.errorBorder,
+                ]}
+                placeholder="Product Name"
+                placeholderTextColor="#666"
+                value={productName}
+                onChangeText={(text) => {
+                setProductName(text);
+                if (errors.productName && text.trim()) {
+                    setErrors((prev) => ({ ...prev, productName: false }));
+                }
+                }}
+            />
+
+            <TextInput
+                style={[
+                styles.input,
+                styles.textArea,
+                errors.description && styles.errorBorder,
+                ]}
+                placeholder="Product Description"
+                placeholderTextColor="#666"
+                value={description}
+                onChangeText={(text) => {
+                setDescription(text);
+                if (errors.description && text.trim()) {
+                    setErrors((prev) => ({ ...prev, description: false }));
+                }
+                }}
+                multiline
+                textAlignVertical="top"
+            />
+
+            {/* Category */}
+            <View
+                style={[
+                styles.dropdownWrapper,
+                categoryOpen ? { zIndex: 2000 } : { zIndex: 1 },
+                ]}
+            >
+                <DropDownPicker
+                open={categoryOpen}
+                value={category}
+                items={[
+                    { label: 'Dresses', value: 'dresses' },
+                    { label: 'Suits', value: 'suits' },
+                    { label: 'Shoes', value: 'shoes' },
+                    { label: 'Accessories', value: 'accessories' },
+                ]}
+                setOpen={setCategoryOpen}
+                setValue={(val) => {
+                    setCategory(val);
+                    if (errors.category && val) {
+                    setErrors((prev) => ({ ...prev, category: false }));
                     }
-                  }}
+                }}
+                placeholder="Select Category"
+                style={[
+                    styles.dropdown,
+                    errors.category && styles.errorBorder,
+                ]}
+                dropDownContainerStyle={styles.dropDownContainer}
+                placeholderStyle={styles.dropDownPlaceholder}
+                zIndex={2000}           // Ensure higher zIndex
+                zIndexInverse={1000}
+                disabled={isKeyboardVisible}
                 />
+            </View>
 
-                <TextInput
-                  style={[
-                    styles.input,
-                    styles.textArea,
-                    errors.description && styles.errorBorder,
-                  ]}
-                  placeholder="Product Description"
-                  placeholderTextColor="#666"
-                  value={description}
-                  onChangeText={(text) => {
-                    setDescription(text);
-                    if (errors.description && text.trim()) {
-                      setErrors((prev) => ({ ...prev, description: false }));
+            {/* Size */}
+            <View
+                style={[
+                styles.dropdownWrapper,
+                sizeOpen ? { zIndex: 2000 } : { zIndex: 1 },
+                ]}
+            >
+                <DropDownPicker
+                open={sizeOpen}
+                value={size}
+                items={[
+                    { label: 'XS', value: 'XS' },
+                    { label: 'S', value: 'S' },
+                    { label: 'M', value: 'M' },
+                    { label: 'L', value: 'L' },
+                    { label: 'XL', value: 'XL' },
+                ]}
+                setOpen={setSizeOpen}
+                setValue={(val) => {
+                    setSize(val);
+                    if (errors.size && val) {
+                    setErrors((prev) => ({ ...prev, size: false }));
                     }
-                  }}
-                  multiline
-                  textAlignVertical="top"
+                }}
+                placeholder="Select Size"
+                style={[styles.dropdown, errors.size && styles.errorBorder]}
+                dropDownContainerStyle={styles.dropDownContainer}
+                placeholderStyle={styles.dropDownPlaceholder}
+                zIndex={2000}
+                zIndexInverse={1000}
+                disabled={isKeyboardVisible}
                 />
+            </View>
 
-                {/* Category */}
-                <View style={{ marginBottom: categoryOpen ? 160 : 12 }}>
-                  <DropDownPicker
-                    open={categoryOpen}
-                    value={category}
-                    items={[
-                      { label: 'Dresses', value: 'dresses' },
-                      { label: 'Suits', value: 'suits' },
-                      { label: 'Shoes', value: 'shoes' },
-                      { label: 'Accessories', value: 'accessories' },
-                    ]}
-                    setOpen={setCategoryOpen}
-                    setValue={(val) => {
-                      setCategory(val);
-                      if (errors.category && val) {
-                        setErrors((prev) => ({ ...prev, category: false }));
-                      }
-                    }}
-                    placeholder="Select Category"
-                    style={[
-                      styles.dropdown,
-                      errors.category && styles.errorBorder,
-                    ]}
-                    dropDownContainerStyle={styles.dropDownContainer}
-                    placeholderStyle={styles.dropDownPlaceholder}
-                    disabled={isKeyboardVisible}
-                  />
-                </View>
+            {/* Rental Price */}
+            <TextInput
+                style={[
+                styles.input,
+                errors.rentalPrice && styles.errorBorder,
+                ]}
+                placeholder="Rental Price ($)"
+                placeholderTextColor="#666"
+                keyboardType="numeric"
+                value={rentalPrice}
+                returnKeyType="done"
+                onSubmitEditing={() => Keyboard.dismiss()}
+                onChangeText={(text) => {
+                const formatted = text.replace(/[^0-9.]/g, '');
+                const value = formatted ? `$${formatted}` : '';
+                setRentalPrice(value);
+                if (errors.rentalPrice && value.trim()) {
+                    setErrors((prev) => ({ ...prev, rentalPrice: false }));
+                }
+                }}
+            />
 
-                {/* Size */}
-                <View style={{ marginBottom: sizeOpen ? 160 : 12 }}>
-                  <DropDownPicker
-                    open={sizeOpen}
-                    value={size}
-                    items={[
-                      { label: 'XS', value: 'XS' },
-                      { label: 'S', value: 'S' },
-                      { label: 'M', value: 'M' },
-                      { label: 'L', value: 'L' },
-                      { label: 'XL', value: 'XL' },
-                    ]}
-                    setOpen={setSizeOpen}
-                    setValue={(val) => {
-                      setSize(val);
-                      if (errors.size && val) {
-                        setErrors((prev) => ({ ...prev, size: false }));
-                      }
-                    }}
-                    placeholder="Select Size"
-                    style={[styles.dropdown, errors.size && styles.errorBorder]}
-                    dropDownContainerStyle={styles.dropDownContainer}
-                    placeholderStyle={styles.dropDownPlaceholder}
-                    disabled={isKeyboardVisible}
-                  />
-                </View>
+            {/* Retail Price */}
+            <TextInput
+                style={[
+                styles.input,
+                errors.retailPrice && styles.errorBorder,
+                ]}
+                placeholder="Retail Price ($)"
+                placeholderTextColor="#666"
+                keyboardType="numeric"
+                value={retailPrice}
+                returnKeyType="done"
+                onSubmitEditing={() => Keyboard.dismiss()}
+                onChangeText={(text) => {
+                const formatted = text.replace(/[^0-9.]/g, '');
+                const value = formatted ? `$${formatted}` : '';
+                setRetailPrice(value);
+                if (errors.retailPrice && value.trim()) {
+                    setErrors((prev) => ({ ...prev, retailPrice: false }));
+                }
+                }}
+            />
+            </ScrollView>
 
-                {/* Rental Price */}
-                <TextInput
-                  style={[
-                    styles.input,
-                    errors.rentalPrice && styles.errorBorder,
-                  ]}
-                  placeholder="Rental Price ($)"
-                  placeholderTextColor="#666"
-                  keyboardType="numeric"
-                  value={rentalPrice}
-                  returnKeyType="done"
-                  onSubmitEditing={() => Keyboard.dismiss()}
-                  onChangeText={(text) => {
-                    const formatted = text.replace(/[^0-9.]/g, '');
-                    const value = formatted ? `$${formatted}` : '';
-                    setRentalPrice(value);
-                    if (errors.rentalPrice && value.trim()) {
-                      setErrors((prev) => ({ ...prev, rentalPrice: false }));
-                    }
-                  }}
-                />
+            <View style={styles.bottomButtonContainer}>
+            <TouchableOpacity style={styles.button} onPress={handleNextPage}>
+                <Text style={styles.buttonText}>Next</Text>
+            </TouchableOpacity>
+            </View>
+        </KeyboardAvoidingView>
+        </View>
 
-                {/* Retail Price */}
-                <TextInput
-                  style={[
-                    styles.input,
-                    errors.retailPrice && styles.errorBorder,
-                  ]}
-                  placeholder="Retail Price ($)"
-                  placeholderTextColor="#666"
-                  keyboardType="numeric"
-                  value={retailPrice}
-                  returnKeyType="done"
-                  onSubmitEditing={() => Keyboard.dismiss()}
-                  onChangeText={(text) => {
-                    const formatted = text.replace(/[^0-9.]/g, '');
-                    const value = formatted ? `$${formatted}` : '';
-                    setRetailPrice(value);
-                    if (errors.retailPrice && value.trim()) {
-                      setErrors((prev) => ({ ...prev, retailPrice: false }));
-                    }
-                  }}
-                />
-              </ScrollView>
-
-              <View style={styles.bottomButtonContainer}>
-                <TouchableOpacity style={styles.button} onPress={handleNextPage}>
-                  <Text style={styles.buttonText}>Next</Text>
-                </TouchableOpacity>
-              </View>
-            </KeyboardAvoidingView>
-          </View>
 
           {/* ---------- PAGE 3: PREVIEW ---------- */}
           <View style={[styles.horizontalPageContainer, { width: SCREEN_WIDTH }]}>
@@ -556,6 +571,10 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     paddingHorizontal: 10,
     gap: 10,
+  },
+  dropdownWrapper: {
+    marginBottom: 12,
+    position: 'relative',
   },
   imageWrapper: {
     height: '30%',
