@@ -1,5 +1,3 @@
-// CompleteProfileScreen.tsx
-
 import React, { useRef, useState, useEffect } from 'react';
 import {
   SafeAreaView,
@@ -11,245 +9,156 @@ import {
   TouchableOpacity,
   Image,
   TextInput,
-  Keyboard,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  Keyboard,
+  ActivityIndicator,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import MapView, { Marker, MapPressEvent, Region } from 'react-native-maps';
 import * as ImagePicker from 'expo-image-picker';
+import * as Location from 'expo-location';
 import { LinearGradient } from 'expo-linear-gradient';
+import Colors from '@/constants/Colors';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+const INITIAL_REGION: Region = {
+  latitude: 37.78825,
+  longitude: -122.4324,
+  latitudeDelta: 0.03,
+  longitudeDelta: 0.03,
+};
 
 const CompleteProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  // Step / page state
   const scrollRef = useRef<ScrollView>(null);
   const [currentPage, setCurrentPage] = useState(0);
-
-  // Profile data
   const [profilePic, setProfilePic] = useState<string | null>(null);
   const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');
+  const [addressCoords, setAddressCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
-  // Validation errors
-  const [errors, setErrors] = useState({
-    profilePic: false,
-    fullName: false,
-    username: false,
-  });
+  const [errors, setErrors] = useState({ profilePic: false, fullName: false, username: false, address: false });
 
-  // For disabling the dropdown or certain elements if keyboard is open
-  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
-
+  /* ------------- keyboard listeners ------------- */
   useEffect(() => {
-    const showListener = Keyboard.addListener('keyboardDidShow', () => {
-      setKeyboardVisible(true);
-    });
-    const hideListener = Keyboard.addListener('keyboardDidHide', () => {
-      setKeyboardVisible(false);
-    });
-
+    const show = Keyboard.addListener('keyboardDidShow', () => setIsKeyboardVisible(true));
+    const hide = Keyboard.addListener('keyboardDidHide', () => setIsKeyboardVisible(false));
     return () => {
-      showListener.remove();
-      hideListener.remove();
+      show.remove();
+      hide.remove();
     };
   }, []);
 
-  // ---------- Step Indicator
-  // Here we're using 2 steps, but you can adapt to 3, etc.
-  const renderStepIndicator = () => {
-    return (
-      <View style={styles.stepIndicatorContainer}>
-        <View
-          style={[
-            styles.stepCircle,
-            { backgroundColor: currentPage === 0 ? '#FF6211' : '#E0E0E0' },
-          ]}
-        />
-        <View style={styles.stepLine} />
-        <View
-          style={[
-            styles.stepCircle,
-            { backgroundColor: currentPage === 1 ? '#FF6211' : '#E0E0E0' },
-          ]}
-        />
-      </View>
-    );
+  /* ---------------- helpers ---------------- */
+  const openImagePicker = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, allowsEditing: true, aspect: [1, 1], quality: 0.9 });
+    if (!result.canceled) {
+      setProfilePic(result.assets[0].uri);
+      if (errors.profilePic) setErrors((p) => ({ ...p, profilePic: false }));
+    }
   };
 
-  // ---------- Pagination logic (like in AddListingScreen)
-  const handleNextPage = () => {
-    // Validate current page’s fields
+  const requestCurrentLocation = async () => {
+    setLocationLoading(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') return;
+      const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+      setAddressCoords({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
+      if (errors.address) setErrors((p) => ({ ...p, address: false }));
+    } finally {
+      setLocationLoading(false);
+    }
+  };
+
+  const onMapPress = (e: MapPressEvent) => {
+    const { latitude, longitude } = e.nativeEvent.coordinate;
+    setAddressCoords({ latitude, longitude });
+    if (errors.address) setErrors((p) => ({ ...p, address: false }));
+  };
+
+  const goToPage = (idx: number) => {
+    scrollRef.current?.scrollTo({ x: idx * SCREEN_WIDTH, animated: true });
+    setCurrentPage(idx);
+  };
+
+  const validateAndProceed = () => {
     if (currentPage === 0) {
-      // Page 1 requires a profile pic
       if (!profilePic) {
-        setErrors((prev) => ({ ...prev, profilePic: true }));
+        setErrors((p) => ({ ...p, profilePic: true }));
         return;
       }
-    } else if (currentPage === 1) {
-      // Page 2 requires fullName and username
-      const newErrors = {
-        profilePic: errors.profilePic, // not relevant here
-        fullName: !fullName.trim(),
-        username: !username.trim(),
-      };
-      setErrors(newErrors);
-
-      // If there's an error, don't proceed
-      if (newErrors.fullName || newErrors.username) return;
-
-      // If no errors, we're done -> navigate to main tabs
-      // you could also do some final sign up logic or API calls here
-      navigation.replace('MainTabs');
+      goToPage(1);
       return;
     }
-
-    // If everything is valid, go to next
-    const nextIndex = currentPage + 1;
-    scrollRef.current?.scrollTo({ x: nextIndex * SCREEN_WIDTH, animated: true });
-    setCurrentPage(nextIndex);
+    const newErr = { profilePic: false, fullName: !fullName.trim(), username: !username.trim(), address: addressCoords === null };
+    setErrors(newErr);
+    if (newErr.fullName || newErr.username || newErr.address) return;
+    navigation.replace('MainTabs');
   };
 
-  const handlePrevPage = () => {
-    if (currentPage === 0) {
-      // Go back from the first page
-      navigation.goBack();
-    } else {
-      const prevIndex = currentPage - 1;
-      scrollRef.current?.scrollTo({ x: prevIndex * SCREEN_WIDTH, animated: true });
-      setCurrentPage(prevIndex);
-    }
-  };
-
-  const handleMomentumScrollEnd = (e: any) => {
-    const offsetX = e.nativeEvent.contentOffset.x;
-    const pageIndex = Math.round(offsetX / SCREEN_WIDTH);
-    setCurrentPage(pageIndex);
-  };
-
-  // ---------- Image Picker
-  const pickProfileImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1], // square
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      const newUri = result.assets[0].uri;
-      setProfilePic(newUri);
-      // Clear error if it was set
-      if (errors.profilePic) {
-        setErrors((prev) => ({ ...prev, profilePic: false }));
-      }
-    }
-  };
-
-  // ---------- RENDER
+  /* ---------------- render ---------------- */
   return (
-    <LinearGradient colors={['#ffffff', '#f8f9fc']} style={{ flex: 1 }}>
+    <LinearGradient colors={['#ffffff', '#F5F7FF']} style={{ flex: 1 }}>
       <SafeAreaView style={styles.safeArea}>
-        {/* Header */}
+        {/* header */}
         <View style={styles.headerContainer}>
-          <TouchableOpacity style={styles.backButton} onPress={handlePrevPage}>
+          <TouchableOpacity onPress={() => (currentPage === 0 ? navigation.goBack() : goToPage(currentPage - 1))} style={styles.headerIconBtn}>
             <Ionicons name="arrow-back" size={26} color="#000" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>
-            {currentPage === 0 ? 'Profile Picture' : 'Username & Name'}
-          </Text>
-          <View style={styles.leftPlaceholder} />
+          <Text style={styles.headerTitle}>{currentPage === 0 ? '' : ''}</Text>
+          <View style={styles.headerIconBtn} />
         </View>
 
-        {/* Step Indicator */}
-        {renderStepIndicator()}
+        {/* steps */}
+        <View style={styles.stepContainer}>{[0, 1].map((i) => (<View key={i} style={styles.stepWrapper}><View style={[styles.stepCircle, { backgroundColor: currentPage === i ? Colors.primary : '#E0E0E0' }]} />{i === 0 && <View style={styles.stepLine} />}</View>))}</View>
 
-        {/* Horizontal pages */}
-        <ScrollView
-          ref={scrollRef}
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          scrollEnabled={false}
-          onMomentumScrollEnd={handleMomentumScrollEnd}
-          style={{ flex: 1 }}
-        >
-          {/* PAGE 1: PROFILE PIC */}
-          <View style={[styles.pageContainer, { width: SCREEN_WIDTH }]}>
+        {/* pages */}
+        <ScrollView horizontal pagingEnabled ref={scrollRef} showsHorizontalScrollIndicator={false} scrollEnabled={false} onMomentumScrollEnd={(e) => setCurrentPage(Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH))} style={{ flex: 1 }}>
+          {/* page 1 */}
+          <View style={[styles.page, { width: SCREEN_WIDTH }]}>
             <View style={styles.pageContent}>
-              <Text style={styles.instructionText}>Upload a Profile Picture</Text>
-              <TouchableOpacity
-                style={[
-                  styles.profilePicContainer,
-                  errors.profilePic ? styles.errorBorder : null,
-                ]}
-                onPress={pickProfileImage}
-              >
-                {profilePic ? (
-                  <Image source={{ uri: profilePic }} style={styles.profilePic} />
-                ) : (
-                  <Ionicons name="camera-outline" size={50} color="#999" />
-                )}
+              <Text style={styles.sectionTitle}>Upload a profile photo</Text>
+              <TouchableOpacity style={[styles.profilePicWrapper, errors.profilePic && styles.errorBorder]} activeOpacity={0.8} onPress={openImagePicker}>
+                {profilePic ? <Image source={{ uri: profilePic }} style={styles.profilePic} /> : <Ionicons name="camera-outline" size={48} color="#999" />}
               </TouchableOpacity>
+              <Text style={styles.helperText}>This photo helps renters know who they'll meet.</Text>
             </View>
-            <View style={styles.bottomButtonContainer}>
-              <TouchableOpacity style={styles.button} onPress={handleNextPage}>
-                <Text style={styles.buttonText}>Next</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity style={styles.primaryBtn} onPress={validateAndProceed}><Text style={styles.primaryBtnText}>Next</Text></TouchableOpacity>
           </View>
 
-          {/* PAGE 2: USERNAME + NAME */}
-          <View style={[styles.pageContainer, { width: SCREEN_WIDTH }]}>
-            <KeyboardAvoidingView
-              style={{ flex: 1 }}
-              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            >
-              <ScrollView
-                contentContainerStyle={styles.pageContent}
-                keyboardShouldPersistTaps="handled"
-              >
-                <Text style={styles.instructionText}>Enter Your Name & Username</Text>
+          {/* page 2 */}
+          <View style={[styles.page, { width: SCREEN_WIDTH }]}>
+            <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+              <ScrollView contentContainerStyle={styles.pageContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+                <Text style={styles.sectionTitle}>Tell us about you</Text>
 
-                <TextInput
-                  style={[
-                    styles.input,
-                    errors.fullName && styles.errorBorder,
-                  ]}
-                  placeholder="Full Name"
-                  placeholderTextColor="#666"
-                  value={fullName}
-                  onChangeText={(text) => {
-                    setFullName(text);
-                    if (errors.fullName && text.trim()) {
-                      setErrors((prev) => ({ ...prev, fullName: false }));
-                    }
-                  }}
-                />
+                {/* full name */}
+                <View style={styles.inputContainer}><Text style={styles.label}>Full Name</Text><TextInput style={[styles.textInput, errors.fullName && styles.errorBorder]} placeholder="John Doe" placeholderTextColor="#777" value={fullName} onChangeText={(t) => { setFullName(t); if (errors.fullName) setErrors((p) => ({ ...p, fullName: false })); }} returnKeyType="next" /></View>
 
-                <TextInput
-                  style={[
-                    styles.input,
-                    errors.username && styles.errorBorder,
-                  ]}
-                  placeholder="Username"
-                  placeholderTextColor="#666"
-                  value={username}
-                  onChangeText={(text) => {
-                    setUsername(text);
-                    if (errors.username && text.trim()) {
-                      setErrors((prev) => ({ ...prev, username: false }));
-                    }
-                  }}
-                />
+                {/* username */}
+                <View style={styles.inputContainer}><Text style={styles.label}>Username</Text><TextInput style={[styles.textInput, errors.username && styles.errorBorder]} placeholder="@johndoe" placeholderTextColor="#777" autoCapitalize="none" value={username} onChangeText={(t) => { setUsername(t); if (errors.username) setErrors((p) => ({ ...p, username: false })); }} /></View>
+
+                {/* map */}
+                <Text style={[styles.label, { marginTop: 6 }]}>Pickup address *</Text>
+                <View style={[styles.mapWrapper, errors.address && styles.errorBorder]}>
+                  <MapView style={styles.map} initialRegion={INITIAL_REGION} onPress={onMapPress} region={addressCoords ? { ...addressCoords, latitudeDelta: 0.01, longitudeDelta: 0.01 } : undefined}>
+                    {addressCoords && <Marker coordinate={addressCoords} draggable onDragEnd={onMapPress} />}
+                  </MapView>
+                  {locationLoading && <View style={styles.loadingOverlay}><ActivityIndicator size="large" color={Colors.primary} /></View>}
+                  {!addressCoords && !locationLoading && (
+                    <View style={styles.tapHintBox}><Ionicons name="pin" size={18} color={Colors.primary} style={{ marginRight: 6 }} /><Text style={styles.tapHintText}>Tap to drop a pin</Text></View>
+                  )}
+                </View>
+                <TouchableOpacity style={styles.locationBtn} onPress={requestCurrentLocation}>{locationLoading ? <ActivityIndicator size="small" color="#fff" /> : (<><Ionicons name="locate" size={18} color="#fff" style={{ marginRight: 6 }} /><Text style={styles.locationBtnText}>Use my current location</Text></>)}</TouchableOpacity>
+
+                <Text style={[styles.helperTextCenter, { marginBottom: 28 }]}>This location will be visible to renters as the pickup spot for your listings. Only an approximate pin (not your exact address) is shown for privacy.</Text>
               </ScrollView>
-
-              <View style={styles.bottomButtonContainer}>
-                <TouchableOpacity style={styles.button} onPress={handleNextPage}>
-                  <Text style={styles.buttonText}>Finish</Text>
-                </TouchableOpacity>
-              </View>
             </KeyboardAvoidingView>
+            <TouchableOpacity style={[styles.primaryBtn, { marginTop: 8 }]} onPress={validateAndProceed}><Text style={styles.primaryBtnText}>Finish</Text></TouchableOpacity>
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -259,119 +168,34 @@ const CompleteProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
 
 export default CompleteProfileScreen;
 
+/* ------------------ STYLES ------------------ */
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
-  headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
-  },
-  backButton: {
-    width: 40,
-  },
-  headerTitle: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
-  },
-  leftPlaceholder: {
-    width: 40,
-  },
-
-  stepIndicatorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 12,
-  },
-  stepCircle: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-  },
-  stepLine: {
-    width: 40,
-    height: 3,
-    backgroundColor: '#E0E0E0',
-    marginHorizontal: 8,
-    borderRadius: 2,
-  },
-
-  pageContainer: {
-    flex: 1,
-    flexDirection: 'column',
-  },
-  pageContent: {
-    flexGrow: 1,
-    padding: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  instructionText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 20,
-  },
-  profilePicContainer: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    backgroundColor: '#EEE',
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    marginBottom: 30,
-  },
-  profilePic: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  bottomButtonContainer: {
-    padding: 20,
-  },
-  button: {
-    backgroundColor: '#FF6211',
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  input: {
-    width: '100%',
-    backgroundColor: '#fff',
-    padding: 14,
-    borderRadius: 10,
-    fontSize: 16,
-    marginVertical: 12,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    color: '#000',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 1,
-  },
-  errorBorder: {
-    borderColor: 'red',
-  },
+  safeArea: { flex: 1 },
+  headerContainer: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingBottom: 14, paddingTop: 6 },
+  headerIconBtn: { width: 40, alignItems: 'flex-start' },
+  headerTitle: { flex: 1, textAlign: 'center', fontSize: 18, fontWeight: '700', color: '#000' },
+  stepContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginVertical: 8 },
+  stepWrapper: { flexDirection: 'row', alignItems: 'center' },
+  stepCircle: { width: 14, height: 14, borderRadius: 7 },
+  stepLine: { width: 50, height: 3, backgroundColor: '#E0E0E0', marginHorizontal: 8, borderRadius: 2 },
+  page: { flex: 1, paddingBottom: 20, justifyContent: 'space-between' },
+  pageContent: { flexGrow: 1, paddingHorizontal: 24, alignItems: 'center', paddingTop: 30 },
+  sectionTitle: { fontSize: 18, fontWeight: '700', color: '#000', marginBottom: 22 },
+  helperText: { marginTop: 14, fontSize: 13, color: '#666', textAlign: 'center' },
+  helperTextCenter: { marginTop: 14, fontSize: 13, color: '#666', textAlign: 'center', paddingHorizontal: 6 },
+  profilePicWrapper: { width: 180, height: 180, borderRadius: 90, backgroundColor: '#EFEFEF', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  profilePic: { width: '100%', height: '100%' },
+  inputContainer: { width: '100%', marginBottom: 16 },
+  label: { fontSize: 11, marginBottom: 4, color: '#555', fontWeight: '500' },
+  textInput: { borderWidth: 1, borderColor: Colors.lightBlack, borderRadius: 8, height: 50, padding: 12, fontSize: 16, color: '#000', backgroundColor: '#fff' },
+  mapWrapper: { width: '100%', height: SCREEN_HEIGHT * 0.28, borderRadius: 12, overflow: 'hidden', backgroundColor: '#EEE' },
+  map: { width: '100%', height: '100%' },
+  tapHintBox: { position: 'absolute', top: '45%', alignSelf: 'center', flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.9)', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 24 },
+  tapHintText: { fontSize: 13, color: Colors.primary, fontWeight: '600' },
+  loadingOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(255,255,255,0.6)', alignItems: 'center', justifyContent: 'center' },
+  locationBtn: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', marginTop: 12, backgroundColor: '#000', borderRadius: 22, paddingVertical: 8, paddingHorizontal: 14 },
+  locationBtnText: { color: '#FFF', fontWeight: '600', fontSize: 14 },
+  primaryBtn: { marginHorizontal: 24, backgroundColor: '#000', borderRadius: 10, paddingVertical: 15, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 6, elevation: 3 },
+  primaryBtnText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
+  errorBorder: { borderColor: 'red' },
 });

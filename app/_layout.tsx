@@ -17,6 +17,7 @@ import UserProfileScreen from '@/screens/UserProfileScreen';
 import AddListingScreen from '@/screens/AddListingScreen';
 import Colors from '@/constants/Colors';
 import CompleteProfileScreen from '@/screens/CompleteProfileScreen';
+import CheckoutFlowScreen from '@/screens/CheckoutFlowScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -111,6 +112,13 @@ export default function Layout() {
         component={AddListingScreen}
         options={{ headerShown: false }}
       />
+
+       {/* 3-panel confirmation flow */}
+     <Stack.Screen
+        name="CheckoutFlow"
+        component={CheckoutFlowScreen}
+        options={{ headerShown: false }}
+       />
     </Stack.Navigator>
   );
 }

@@ -1,5 +1,7 @@
-import Colors from '@/constants/Colors';
-import React, { useState } from 'react';
+// =============================================================================
+// components/UserCard.tsx – Airbnb‑style profile card (no save button)
+// =============================================================================
+import React from 'react';
 import {
   View,
   Text,
@@ -8,145 +10,117 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import Colors from '@/constants/Colors';
 
-// Define the User type
+/* -------------------------------------------------------------------------- */
 interface User {
-  userId: string;   
+  userId: string;
   name: string;
-  email: string;
-  followers: number;
-  following: number;
-  bio: string;
   username: string;
   profileImage: string;
   reviews: number;
-  userRating: number;
-  responseRate: number;
+  userRating: number; // 0‑5
+}
+interface Props extends User {
+  /** optional style override */
+  style?: object;
+  /** tap handler (e.g. navigate to profile) */
+  onPress?: () => void;
 }
 
-interface UserProps extends User {
-  style?: object; 
-}
-
-const UserCard: React.FC<UserProps> = ({
-  userId,
+const UserCard: React.FC<Props> = ({
   name,
-  email,
-  followers,
-  following,
-  bio,
   username,
   profileImage,
   reviews,
   userRating,
-  responseRate,
   style,
+  onPress,
 }) => {
-  console.log('Profile Image Source:', profileImage);
-
   return (
-    <View style={styles.cardContainer}>
-      {/* Profile Section */}
-      <View style={styles.profileSection}>
-        <Image source={{ uri: profileImage }} style={styles.profileImage} />
-        <Text style={styles.userName}>{name}</Text>
-        <Text style={styles.userHandle}>{username}</Text>
+    <TouchableOpacity
+      activeOpacity={0.85}
+      style={[styles.cardContainer, style]}
+      onPress={onPress}
+    >
+      {/* hero / avatar */}
+      <View style={styles.imageContainer}>
+        <Image source={{ uri: profileImage }} style={styles.avatar} />
       </View>
 
-      {/* Separator */}
-      <View style={styles.separator} />
+      {/* text content */}
+      <View style={styles.textContainer}>
+        <Text style={styles.nameText} numberOfLines={1}>{name}</Text>
+        <Text style={styles.handleText} numberOfLines={1}>@{username}</Text>
 
-      {/* Stats Section */}
-      <View style={styles.statsSection}>
-        <View style={styles.statItem}>
-          <Text style={styles.statValue}>{reviews}</Text>
-          <Text style={styles.statLabel}>Reviews</Text>
-        </View>
-
-        <View style={styles.statItem}>
+        <View style={styles.bottomRow}>
           <View style={styles.ratingContainer}>
-            <Text style={styles.statValue}>{userRating.toFixed(1)}</Text>
-            <Ionicons name="star" size={16} color="#000" style={styles.starIcon} />
+            <Ionicons name="star" size={18} color={Colors.primary} />
+            <Text style={styles.ratingText}>{userRating.toFixed(2)}</Text>
           </View>
-          <Text style={styles.statLabel}>Rating</Text>
-        </View>
-
-        <View style={styles.statItem}>
-          <Text style={styles.statValue}>{responseRate}%</Text>
-          <Text style={styles.statLabel}>Response Rate</Text>
+          <Text style={styles.reviewText}>{reviews} review{reviews !== 1 ? 's' : ''}</Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
 export default UserCard;
 
-
-/* --- Styles --- */
+/* -------------------------------------------------------------------------- */
 const styles = StyleSheet.create({
   cardContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 15,
+    borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 5, // For Android shadow
-    marginTop: 15,
-    marginBottom: 17,
-    marginHorizontal: 20,
+    shadowOpacity: 0.08,
+    shadowRadius: 5,
+    elevation: 2,
+    marginHorizontal: 15,
+    marginBottom: 20,
   },
-  profileSection: {
+  imageContainer: {
     alignItems: 'center',
-    marginRight: 20,
+    paddingTop: 20,
   },
-  profileImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    marginBottom: 10,
+  avatar: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    resizeMode: 'cover',
+    backgroundColor: '#eee',
   },
-  userName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+  textContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+    alignItems: 'center',
   },
-  userHandle: {
-    fontSize: 14,
-    color: '#aaa',
-  },
-  separator: {
-    width: 2,
-    height: '100%',
-    backgroundColor: '#E5E5E5',
-    marginHorizontal: 12,
-  },
-  statsSection: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  statItem: {
-    marginBottom: 10,
-  },
-  statValue: {
+  nameText: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: '700',
     color: '#000',
   },
-  statLabel: {
+  handleText: {
+    marginTop: 4,
     fontSize: 14,
-    color: '#666',
+    color: '#777',
   },
-  ratingContainer: {
+  bottomRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginTop: 8,
   },
-  starIcon: {
+  ratingContainer: { flexDirection: 'row', alignItems: 'center' },
+  ratingText: {
     marginLeft: 4,
-    color: Colors.primary,
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#000',
+  },
+  reviewText: {
+    marginLeft: 10,
+    fontSize: 14,
+    color: '#666',
   },
 });

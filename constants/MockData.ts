@@ -135,7 +135,7 @@ export const SAMPLE_USERS = [
     followers: 54,
     following: 62,
     bio: 'Avid Texas fan looking to get rent out some clothes in my wardrobe.',
-    username: '@texas.fan77',
+    username: 'texas.fan77',
     profileImage: 'https://randomuser.me/api/portraits/men/60.jpg',
     reviews: 15,
     userRating: 4.8,
@@ -144,7 +144,7 @@ export const SAMPLE_USERS = [
   {
     userId: 'user1',
     name: 'Alyssa Gray',
-    username: '@alyssa.gray04',
+    username: 'alyssa.gray04',
     email: 'alyssag@gmail.com',
     followers: 34,
     following: 76,
@@ -157,7 +157,7 @@ export const SAMPLE_USERS = [
   {
     userId: 'user2',
     name: 'James Carter',
-    username: '@james.carter21',
+    username: 'james.carter21',
     email: 'jamesc21@gmail.com',
     followers: 50,
     following: 120,
@@ -170,7 +170,7 @@ export const SAMPLE_USERS = [
   {
     userId: 'user3',
     name: 'Sophia Martinez',
-    username: '@sophia.mtz12',
+    username: 'sophia.mtz12',
     email: 'sophiam12@gmail.com',
     followers: 78,
     following: 95,
@@ -183,7 +183,7 @@ export const SAMPLE_USERS = [
   {
     userId: 'user4',
     name: 'Liam Johnson',
-    username: '@liam.johnson88',
+    username: 'liam.johnson88',
     email: 'liamj88@gmail.com',
     followers: 40,
     following: 60,
@@ -196,7 +196,7 @@ export const SAMPLE_USERS = [
   {
     userId: 'user5',
     name: 'Emma Wilson',
-    username: '@emma.wilson77',
+    username: 'emma.wilson77',
     email: 'emmaw77@gmail.com',
     followers: 65,
     following: 110,
@@ -209,7 +209,7 @@ export const SAMPLE_USERS = [
   {
     userId: 'user6',
     name: 'Noah Brown',
-    username: '@noah.brown05',
+    username: 'noah.brown05',
     email: 'noahb05@gmail.com',
     followers: 85,
     following: 90,
@@ -222,7 +222,7 @@ export const SAMPLE_USERS = [
   {
     userId: 'user7',
     name: 'Olivia Davis',
-    username: '@olivia.davis24',
+    username: 'olivia.davis24',
     email: 'oliviad24@gmail.com',
     followers: 120,
     following: 135,
@@ -235,7 +235,7 @@ export const SAMPLE_USERS = [
   {
     userId: 'user8',
     name: 'Mason Lee',
-    username: '@mason.lee32',
+    username: 'mason.lee32',
     email: 'masonl32@gmail.com',
     followers: 33,
     following: 44,
@@ -248,7 +248,7 @@ export const SAMPLE_USERS = [
   {
     userId: 'user9',
     name: 'Isabella Thomas',
-    username: '@isabella.thomas91',
+    username: 'isabella.thomas91',
     email: 'isabellat91@gmail.com',
     followers: 72,
     following: 89,
@@ -261,7 +261,7 @@ export const SAMPLE_USERS = [
   {
     userId: 'user10',
     name: 'Ethan Garcia',
-    username: '@ethan.garcia09',
+    username: 'ethan.garcia09',
     email: 'ethang09@gmail.com',
     followers: 55,
     following: 70,

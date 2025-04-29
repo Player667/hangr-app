@@ -1,16 +1,23 @@
-import Colors from '@/constants/Colors'; // If you have a colors file, otherwise replace with #FF6211
-import React, { useState } from 'react';
+// screens/MessagesScreen.tsx – with collapsible header
+import React, { useRef, useState } from 'react';
 import {
+  SafeAreaView,
+  StyleSheet,
+  Animated,
+  FlatList,
+  TouchableOpacity,
   View,
   Text,
-  StyleSheet,
-  SafeAreaView,
-  TouchableOpacity,
-  FlatList,
   Image,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import Colors from '@/constants/Colors';   // or just hard-code “#FF6211”
+
+/* ------------------------------------------------------------------ */
+/*  mock data                                                          */
+/* ------------------------------------------------------------------ */
 const FILTERS = [
   { id: 'hosting', label: 'Hosting', active: true },
   { id: 'unread', label: 'Unread', active: false },
@@ -34,76 +41,89 @@ const CONVERSATIONS = [
     status: 'Trip requested',
     statusColor: '#EB5757',
     name: 'Edward',
-    snippet: 'Airbnb update: A request to book...',
+    snippet: 'Airbnb update: A request to book…',
     dateRange: '25–27 May · Santorini',
     time: 'Yesterday',
     avatarUrl: 'https://randomuser.me/api/portraits/men/85.jpg',
   },
-  // ...
 ];
 
+/* ------------------------------------------------------------------ */
+/*  collapsible-header constants                                       */
+/* ------------------------------------------------------------------ */
+const HEADER_EXPANDED = 70;      // visible height *below* safe-area inset
+const HEADER_COLLAPSED = 64;
+
 const MessagesScreen: React.FC = () => {
-  const [filters, setFilters] = useState(FILTERS);
+  const insets = useSafeAreaInsets();
 
-  const handleFilterPress = (id: string) => {
-    setFilters((prev) =>
-      prev.map((f) => ({ ...f, active: f.id === id }))
-    );
-  };
+  /* ---------- animation ---------- */
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_EXPANDED - HEADER_COLLAPSED],
+    outputRange: [HEADER_EXPANDED + insets.top, HEADER_COLLAPSED + insets.top],
+    extrapolate: 'clamp',
+  });
+  const titleFontSize = scrollY.interpolate({
+    inputRange: [0, HEADER_EXPANDED - HEADER_COLLAPSED],
+    outputRange: [20, 17],
+    extrapolate: 'clamp',
+  });
 
-  const handleConversationPress = (convId: string) => {
-    console.log('Pressed conversation:', convId);
-  };
-
-  const renderConversationItem = ({ item }: any) => (
-    <TouchableOpacity
-      style={styles.conversationItem}
-      onPress={() => handleConversationPress(item.id)}
-      activeOpacity={0.8}
-    >
+  /* ---------- helpers ---------- */
+  const renderConversation = ({ item }: any) => (
+    <TouchableOpacity style={styles.conversationItem} activeOpacity={0.85}>
       <Image source={{ uri: item.avatarUrl }} style={styles.avatar} />
-      <View style={styles.conversationDetails}>
-        <View style={styles.conversationRow}>
-          <View style={styles.statusContainer}>
-            <View
-              style={[styles.statusDot, { backgroundColor: item.statusColor }]}
-            />
-            <Text style={styles.statusText}>{item.status}</Text>
+      <View style={styles.convDetails}>
+        <View style={styles.firstRow}>
+          <View style={styles.statusWrap}>
+            <View style={[styles.statusDot, { backgroundColor: item.statusColor }]} />
+            <Text style={styles.statusTxt}>{item.status}</Text>
           </View>
-          <Text style={styles.timeText}>{item.time}</Text>
+          <Text style={styles.timeTxt}>{item.time}</Text>
         </View>
-        <Text style={styles.conversationName} numberOfLines={1}>
+        <Text style={styles.nameTxt} numberOfLines={1}>
           {item.name}
         </Text>
-        <Text style={styles.conversationSnippet} numberOfLines={1}>
+        <Text style={styles.snippetTxt} numberOfLines={1}>
           {item.snippet}
         </Text>
-        <Text style={styles.conversationDates}>{item.dateRange}</Text>
+        <Text style={styles.dateTxt}>{item.dateRange}</Text>
       </View>
     </TouchableOpacity>
   );
 
+  /* ---------- UI ---------- */
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Top bar */}
-      <View style={styles.headerContainer}>
-        <View style={styles.leftPlaceholder} />
-        <Text style={styles.headerTitle}>Messages</Text>
-        <TouchableOpacity style={styles.headerIconButton}>
-          <Ionicons name="search" size={24} color="#000" />
-        </TouchableOpacity>
-      </View>
+    <SafeAreaView style={styles.root} edges={['top']}>
+      {/* Collapsible header */}
+      <Animated.View style={[styles.header, { height: headerHeight }]}>
+        <View style={[styles.headerContent, { paddingTop: insets.top + 8 }]}>
+          <View style={styles.headerRow}>
+            <Animated.Text style={[styles.headerTitle, { fontSize: titleFontSize }]}>
+              Messages
+            </Animated.Text>
+          </View>
+          <Text style={styles.subtitle}>{CONVERSATIONS.length} conversations</Text>
+        </View>
+      </Animated.View>
 
-      {/* (Optional) Filter chips row */}
-      {/* <ScrollView horizontal ...> ... </ScrollView> */}
-
-      {/* Conversation list */}
-      <FlatList
+      {/* List */}
+      <Animated.FlatList
         data={CONVERSATIONS}
         keyExtractor={(item) => item.id}
-        renderItem={renderConversationItem}
+        renderItem={renderConversation}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContainer}
+        contentContainerStyle={{
+          paddingTop: HEADER_EXPANDED + 10,
+          paddingBottom: 40,
+          paddingHorizontal: 12,
+        }}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false },
+        )}
+        scrollEventThrottle={16}
       />
     </SafeAreaView>
   );
@@ -111,91 +131,49 @@ const MessagesScreen: React.FC = () => {
 
 export default MessagesScreen;
 
-/* --- Styles --- */
+/* ------------------------------------------------------------------ */
+/*  styles                                                            */
+/* ------------------------------------------------------------------ */
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F8F9FB', // unify
-  },
-  headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  root: { flex: 1, backgroundColor: '#F8F9FB' },
+
+  /* header */
+  header: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
     backgroundColor: '#F8F9FB',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#e8e8e8',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 4,
+    zIndex: 10,
   },
-  leftPlaceholder: {
-    width: 24,
-  },
-  headerTitle: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#000',
-  },
-  headerIconButton: {
-    padding: 8,
-  },
-  listContainer: {
-    paddingHorizontal: 12,
-  },
-  conversationItem: {
-    flexDirection: 'row',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginRight: 12,
-  },
-  conversationDetails: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  conversationRow: {
+  headerContent: { paddingHorizontal: 24 },
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 2,
   },
-  statusContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 6,
-  },
-  statusText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-  },
-  timeText: {
-    fontSize: 13,
-    color: '#999',
-  },
-  conversationName: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#000',
-    marginBottom: 2,
-  },
-  conversationSnippet: {
-    fontSize: 13,
-    color: '#666',
-    marginBottom: 2,
-  },
-  conversationDates: {
-    fontSize: 12,
-    color: '#999',
-  },
+  headerTitle: { fontWeight: '700', color: '#111' },
+  subtitle: { marginTop: 2, fontSize: 13, fontWeight: '500', color: '#666' },
+  actionBtn: { padding: 4 },
+
+  /* conversation cell */
+  conversationItem: { flexDirection: 'row', paddingVertical: 14, borderBottomColor: '#EFEFEF', borderBottomWidth: 1 },
+  avatar: { width: 48, height: 48, borderRadius: 24, marginRight: 12 },
+  convDetails: { flex: 1 },
+  firstRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  statusWrap: { flexDirection: 'row', alignItems: 'center' },
+  statusDot: { width: 8, height: 8, borderRadius: 4, marginRight: 6 },
+  statusTxt: { fontSize: 14, fontWeight: '600', color: '#333' },
+  timeTxt: { fontSize: 13, color: '#999' },
+  nameTxt: { fontSize: 15, fontWeight: '600', color: '#000', marginBottom: 2 },
+  snippetTxt: { fontSize: 13, color: '#666', marginBottom: 2 },
+  dateTxt: { fontSize: 12, color: '#999' },
 });
+

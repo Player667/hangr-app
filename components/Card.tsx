@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+// components/Card.tsx – now with local save state
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,172 +7,117 @@ import {
   Image,
   TouchableOpacity,
   StyleProp,
-  ViewStyle
-} from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+  ViewStyle,
+} from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import { LinearGradient } from "expo-linear-gradient";
 
-// Define the Listing type
-interface Listing {
+/* ---------- props & types ---------- */
+export interface Listing {
+  id: string;
   imageUrl: string;
   listing: string;
   category: string;
   size: string;
   rentalPrice: number;
-  retailPrice: number;
   rating: number;
-  ratingCount: number;
-  description: string;
-  listerId: string;
 }
 
-export interface CardProps extends Listing {
+interface CardProps {
+  data: Listing;
+  saved: boolean;              // value received from parent at mount
+  onToggleSave: () => void;    // parent callback (still fired)
+  onPress: () => void;
   style?: StyleProp<ViewStyle>;
 }
 
+/* ---------- component ---------- */
 const Card: React.FC<CardProps> = ({
-  imageUrl,
-  listing,
-  category,
-  size,
-  rentalPrice,
-  rating,
-  ratingCount,
+  data,
+  saved,
+  onToggleSave,
+  onPress,
   style,
 }) => {
-  // Manage saved items using state
-  const [isLiked, setIsLiked] = useState(false);
+  /* keep a mirror of “saved” locally so every card re-renders in isolation */
+  const [isSaved, setIsSaved] = useState(saved);
 
-  const handleHeartPress = () => {
-    setIsLiked(!isLiked);
-    if (!isLiked) {
-      // Like functionality
-    } else {
-      // Unlike functionality
-    }
+  /* if parent changes the prop later, sync it */
+  useEffect(() => setIsSaved(saved), [saved]);
+
+  const handleHeart = () => {
+    setIsSaved((prev) => !prev); // instant visual feedback
+    onToggleSave();             // let parent know (if it cares)
   };
 
   return (
-    <View style={[styles.cardContainer, style]}>
-      {/* Image Section */}
-      <Image source={{ uri: imageUrl }} style={styles.cardImage} />
+    <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={[styles.cardWrapper, style]}>
+      <View style={styles.imageWrapper}>
+        <Image source={{ uri: data.imageUrl }} style={styles.image} />
 
-      {/* Heart Icon on top-right */}
-      <TouchableOpacity
-        style={styles.heartIconContainer}
-        onPress={handleHeartPress}
-      >
-        <Ionicons
-          name={isLiked ? 'heart' : 'heart-outline'}
-          size={20}
-          color={isLiked ? '#FF6211' : '#fff'}
-        />
-      </TouchableOpacity>
+        {/* fade at bottom */}
+        <LinearGradient colors={["transparent", "rgba(0,0,0,0.7)"]} style={StyleSheet.absoluteFill} />
 
-      {/* Transparent overlay for text content */}
-      <View style={styles.overlay}>
-        <Text style={styles.listingText} numberOfLines={1}>
-          {listing}
-        </Text>
-        <Text style={styles.categoryText}>
-          {category} • {size}
-        </Text>
+        {/* heart */}
+        <TouchableOpacity style={styles.heartTouch} onPress={handleHeart} hitSlop={8}>
+          <Ionicons
+            name={isSaved ? "heart" : "heart-outline"}
+            size={22}
+            color={isSaved ? "#FF6211" : "#fff"}
+          />
+        </TouchableOpacity>
 
-        <View style={styles.bottomRow}>
-          <Text style={styles.priceText}>
-            ${rentalPrice} <Text style={styles.perDay}>/ Day</Text>
+        {/* bottom copy */}
+        <View style={styles.textOverlay}>
+          <Text style={styles.title} numberOfLines={1}>
+            {data.listing}
           </Text>
-
-          <View style={styles.ratingContainer}>
-            <Ionicons name="star" size={18} color="#FF6211" />
-            <Text style={styles.ratingText}>{rating.toFixed(1)}</Text>
+          <Text style={styles.subtitle} numberOfLines={1}>
+            {`${data.category} • ${data.size}`}
+          </Text>
+          <View style={styles.bottomRow}>
+            <Text style={styles.price}>${data.rentalPrice}/day</Text>
+            <View style={styles.ratingRow}>
+              <Ionicons name="star" size={14} color="#FFD700" />
+              <Text style={styles.ratingText}>{data.rating.toFixed(1)}</Text>
+            </View>
           </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
 export default Card;
 
+/* ---------- styles ---------- */
 const styles = StyleSheet.create({
-  cardContainer: {
-    marginTop: 10,
-    marginHorizontal: 15,
-    marginBottom: 20,
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    overflow: 'hidden',
-
-    // Shadow / Elevation
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 5,
-    elevation: 2,
-  },
-  cardImage: {
-    width: '100%',
-    aspectRatio: 4 / 4, // Maintain a consistent aspect ratio
-    resizeMode: 'cover',
-  },
-  heartIconContainer: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    backgroundColor: 'rgba(0,0,0,0.35)',
+  cardWrapper: { width: "48%", marginBottom: 20 },
+  imageWrapper: {
+    aspectRatio: 3 / 4,
     borderRadius: 20,
-    padding: 6,
-    zIndex: 2, // Ensure the heart icon is above the overlay
+    overflow: "hidden",
+    backgroundColor: "#eee",
   },
-  overlay: {
-    // Position the overlay absolutely on top of the image
-    position: 'absolute',
+  image: { ...StyleSheet.absoluteFillObject },
+  heartTouch: { position: "absolute", top: 10, right: 10, zIndex: 2 },
+  textOverlay: {
+    position: "absolute",
     left: 0,
     right: 0,
     bottom: 0,
-
-    // Semi-transparent background
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-
-    // Place content at the bottom
-    justifyContent: 'flex-end',
-    padding: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
-  listingText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#fff',
-    marginBottom: 3,
-  },
-  categoryText: {
-    fontSize: 14,
-    fontWeight: '400',
-    color: '#fff',
-    marginBottom: 8,
-  },
+  title: { fontSize: 15, fontWeight: "700", color: "#fff" },
+  subtitle: { fontSize: 12, color: "#fff", marginTop: 2 },
   bottomRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 6,
   },
-  priceText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  perDay: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#fff',
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  ratingText: {
-    marginLeft: 4,
-    fontSize: 16,
-    color: '#fff',
-    fontWeight: '500',
-  },
+  price: { fontSize: 13, fontWeight: "600", color: "#fff" },
+  ratingRow: { flexDirection: "row", alignItems: "center" },
+  ratingText: { marginLeft: 3, fontSize: 12, fontWeight: "600", color: "#fff" },
 });

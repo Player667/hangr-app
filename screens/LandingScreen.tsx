@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontWeight: '800',
     letterSpacing: 2,
-    color: '#333',
+    color: Colors.primary,
     marginBottom: 10,
   },
   subtitle: {
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   primaryButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: '#000',
     borderRadius: 8,
     paddingVertical: 14,
     alignItems: 'center',

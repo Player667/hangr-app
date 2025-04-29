@@ -1,151 +1,103 @@
-import React, { useState } from 'react';
+// =============================================================================
+// components/ClosetCard.tsx – matches explore-card aesthetic, no heart icon
+// =============================================================================
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
   Image,
   TouchableOpacity,
+  StyleProp,
+  ViewStyle,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { CardProps } from './Card';
+import { LinearGradient } from 'expo-linear-gradient';
+import Colors from '@/constants/Colors';
 
-const ClosetCard: React.FC<CardProps> = ({
+export interface ClosetCardProps {
+  imageUrl: string;
+  listing: string;
+  category: string;
+  size: string;
+  rentalPrice?: number;
+  rating?: number;
+  onPress?: () => void;
+  style?: StyleProp<ViewStyle>;
+}
+
+const ClosetCard: React.FC<ClosetCardProps> = ({
   imageUrl,
   listing,
   category,
   size,
   rentalPrice,
   rating,
+  onPress,
+  style,
 }) => {
-  // Example like/unlike state
-  const [isLiked, setIsLiked] = useState(false);
-
-  const handleHeartPress = () => {
-    setIsLiked(!isLiked);
-  };
-
   return (
-    <View style={styles.cardContainer}>
-      {/* Image Section */}
-      <View style={styles.imageContainer}>
-        <Image source={{ uri: imageUrl }} style={styles.cardImage} />
+    <TouchableOpacity
+      activeOpacity={0.9}
+      onPress={onPress}
+      style={[styles.cardWrapper, style]}
+    >
+      <View style={styles.imageWrapper}>
+        <Image source={{ uri: imageUrl }} style={styles.image} />
+        {/* bottom fade */}
+        <LinearGradient colors={["transparent", "rgba(0,0,0,0.7)"]} style={StyleSheet.absoluteFill} />
 
-        {/* Heart icon (top-right) */}
-        <TouchableOpacity
-          style={styles.heartIconContainer}
-          onPress={handleHeartPress}
-        >
-          <Ionicons
-            name={isLiked ? 'heart' : 'heart-outline'}
-            size={20}
-            color={isLiked ? '#FF6211' : '#fff'}
-          />
-        </TouchableOpacity>
-      </View>
-
-      {/* Semi-transparent overlay for text */}
-      <View style={styles.textContainer}>
-        <Text style={styles.listingText} numberOfLines={1}>{listing}</Text>
-        <Text style={styles.categoryText}>{category} • {size}</Text>
-
-        {/* Bottom Row with Price & Rating (if available) */}
-        <View style={styles.bottomRow}>
-          {/* <Text style={styles.priceText}>
-            ${rentalPrice} <Text style={styles.perDay}>/ Day</Text>
-          </Text> */}
-          {typeof rating === 'number' && !isNaN(rating) && (
-            <View style={styles.ratingContainer}>
-                <Ionicons name="star" size={18} color="#FF6211" />
+        {/* bottom copy */}
+        <View style={styles.textOverlay}>
+          <Text style={styles.title} numberOfLines={1}>{listing}</Text>
+          <Text style={styles.subtitle} numberOfLines={1}>{category} • {size}</Text>
+          <View style={styles.bottomRow}>
+            {typeof rentalPrice === 'number' && (
+              <Text style={styles.price}>${rentalPrice}<Text style={styles.perDay}>/day</Text></Text>
+            )}
+            {typeof rating === 'number' && !isNaN(rating) && (
+              <View style={styles.ratingRow}>
+                <Ionicons name="star" size={14} color={Colors.primary} />
                 <Text style={styles.ratingText}>{rating.toFixed(1)}</Text>
-            </View> )}
+              </View>
+            )}
+          </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
 export default ClosetCard;
 
+/* -------------------------------------------------------------------------- */
 const styles = StyleSheet.create({
-  cardContainer: {
-    // You can remove width/height if you want the layout to be fluid in a parent container.
-    // The key is the aspectRatio in imageContainer.
-    width: '100%',
-    borderRadius: 16,
-    overflow: 'hidden',
-    marginBottom: 20,
-
-    // Shadow / Elevation
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 5,
-    elevation: 3,
-  },
-  imageContainer: {
-    // 6/4 aspect ratio => 1.5
-    width: '100%',
-    aspectRatio: 4 / 4,   // This controls the image area height relative to width
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    overflow: 'hidden',
-  },
-  cardImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover', // Ensures the image covers the area properly
-  },
-  heartIconContainer: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+  cardWrapper: { width: '100%', marginBottom: 20 },
+  imageWrapper: {
+    aspectRatio: 3 / 4,
     borderRadius: 20,
-    padding: 6,
+    overflow: 'hidden',
+    backgroundColor: '#eee',
   },
-  textContainer: {
-    // The overlay behind the text
+  image: { ...StyleSheet.absoluteFillObject },
+  textOverlay: {
     position: 'absolute',
+    left: 0,
+    right: 0,
     bottom: 0,
-    width: '100%',
-    padding: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)', // 0.4 opacity
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
-  listingText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 2,
-  },
-  categoryText: {
-    fontSize: 13,
-    color: '#ddd',
-  },
+  title: { fontSize: 15, fontWeight: '700', color: '#fff' },
+  subtitle: { fontSize: 12, color: '#fff', marginTop: 2 },
   bottomRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 6,
   },
-  priceText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  perDay: {
-    fontSize: 12,
-    fontWeight: '400',
-    color: '#ddd',
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  ratingText: {
-    marginLeft: 4,
-    fontSize: 14,
-    color: '#fff',
-    fontWeight: '500',
-  },
+  price: { fontSize: 13, fontWeight: '600', color: '#fff' },
+  perDay: { fontSize: 12, fontWeight: '400', color: '#ddd' },
+  ratingRow: { flexDirection: 'row', alignItems: 'center' },
+  ratingText: { marginLeft: 3, fontSize: 12, fontWeight: '600', color: '#fff' },
 });

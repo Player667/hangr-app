@@ -1,408 +1,312 @@
-import React, { useState, useRef } from 'react';
+// =============================================================================
+// screens/ProfileScreen.tsx – v7  ⭐ fixes pfp overlap with header
+// =============================================================================
+import React, { useRef, useState } from 'react';
 import {
-  SafeAreaView,
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Image,
-  TouchableOpacity,
   Animated,
   Dimensions,
-  Pressable,
+  FlatList,
+  Image,
   PanResponder,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Text,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import * as Haptics from 'expo-haptics';
+
 import ClosetCard from '@/components/ClosetCard';
 import { LISTING_ITEMS, SAMPLE_USERS } from '@/constants/MockData';
+import Colors from '@/constants/Colors';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
+/* -------------------------------------------------------------------------- */
+const { width: W, height: H } = Dimensions.get('window');
+const HEADER_EXPANDED = 70;
+const HEADER_COLLAPSED = 64;
+const AVATAR_RADIUS = 50; // for layout math
 
-const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const [myCloset] = useState(LISTING_ITEMS);
-  const [mainUser] = useState(SAMPLE_USERS[0]);
+/* -------------------------------------------------------------------------- */
+export default function ProfileScreen({ navigation }: any) {
+  const insets = useSafeAreaInsets();
 
-  // Settings Bar
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuAnim = useRef(new Animated.Value(SCREEN_WIDTH)).current;
+  /* data */
+  const [user] = useState(SAMPLE_USERS[0]);
+  const closet = LISTING_ITEMS.filter((i) => i.listerId === 'user0');
 
-  // Open/Close Settings Menu
-  const openMenu = () => {
-    setIsMenuOpen(true);
-    Animated.timing(menuAnim, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
+  /* ---------- collapsible header ---------- */
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_EXPANDED - HEADER_COLLAPSED],
+    outputRange: [HEADER_EXPANDED + insets.top, HEADER_COLLAPSED + insets.top],
+    extrapolate: 'clamp',
+  });
+  const titleFont = scrollY.interpolate({
+    inputRange: [0, HEADER_EXPANDED - HEADER_COLLAPSED],
+    outputRange: [20, 17],
+    extrapolate: 'clamp',
+  });
+
+  /* ---------- settings drawer ---------- */
+  const [drawer, setDrawer] = useState(false);
+  const drawerX = useRef(new Animated.Value(W)).current;
+  const openDrawer = () => {
+    setDrawer(true);
+    Animated.spring(drawerX, { toValue: 0, useNativeDriver: true }).start();
   };
-  const closeMenu = () => {
-    Animated.timing(menuAnim, {
-      toValue: SCREEN_WIDTH,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => setIsMenuOpen(false));
-  };
+  const closeDrawer = () =>
+    Animated.spring(drawerX, { toValue: W, useNativeDriver: true }).start(() => setDrawer(false));
 
-  // Pan Responder (swiping menu)
-  const panResponder = useRef(
+  const pan = useRef(
     PanResponder.create({
-      onMoveShouldSetPanResponder: (_, gestureState) => Math.abs(gestureState.dx) > 10,
-      onPanResponderMove: (_, gestureState) => {
-        if (gestureState.dx > -50) {
-          menuAnim.setValue(gestureState.dx);
-        }
-      },
-      onPanResponderRelease: (_, gestureState) => {
-        if (gestureState.dx > 100) {
-          closeMenu();
-        } else {
-          openMenu();
-        }
-      },
-    })
+      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 8,
+      onPanResponderMove: (_, g) => g.dx > -60 && drawerX.setValue(g.dx),
+      onPanResponderRelease: (_, g) => (g.dx > 90 ? closeDrawer() : openDrawer()),
+    }),
   ).current;
 
-  // Log Out Function
-  const handleLogout = () => {
-    closeMenu();
-    navigation.replace('Landing');
-  };
+  /* ---------- closet renderer ---------- */
+  const renderCard = ({ item }: any) => (
+    <ClosetCard
+      imageUrl={item.imageUrl}
+      listing={item.listing}
+      category={item.category}
+      size={item.size}
+      rentalPrice={item.rentalPrice}
+      style={{ width: (W - 36) / 2 }}
+      onPress={() => navigation.navigate('Listing', { listingData: item })}
+    />
+  );
 
+  /* ---------------------------------------------------------------------- */
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.headerContainer}>
-        <View style={styles.leftPlaceholder} />
-        <Text style={styles.headerTitle}>Profile</Text>
-        <TouchableOpacity style={styles.headerIconButton} onPress={openMenu}>
-          <Ionicons name="settings-outline" size={24} color="#000" />
-        </TouchableOpacity>
-      </View>
+    <SafeAreaView style={s.root} edges={['top']}>
+      {/* ===== Collapsible header ===== */}
+      <Animated.View style={[s.header, { height: headerHeight }]}>        
+        <View style={[s.headerContent, { paddingTop: insets.top + 8 }]}>          
+          <View style={s.headerRow}>
+            <Animated.Text style={[s.headerTitle, { fontSize: titleFont }]}>Profile</Animated.Text>
+            <TouchableOpacity hitSlop={8} onPress={openDrawer}>
+              <Ionicons name="settings-outline" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
+          <Text style={s.headerSub}>{closet.length} items in closet</Text>
+        </View>
+      </Animated.View>
 
-      <FlatList
-        data={myCloset.filter((item) => item.listerId === 'user0')}
-        keyExtractor={(_, index) => index.toString()}
+      {/* ===== scrolling content ===== */}
+      <Animated.FlatList
+        data={closet}
+        keyExtractor={(i) => i.id}
         numColumns={2}
-        columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 10 }}
-        contentContainerStyle={{ paddingBottom: 80 }}
+        showsVerticalScrollIndicator={false}
+        /* extra padding ensures avatar sits wholly beneath header */
+        contentContainerStyle={{ paddingTop: HEADER_EXPANDED + AVATAR_RADIUS + 34, paddingBottom: 140 }}
+        columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 12 }}
+        renderItem={renderCard}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false },
+        )}
         ListHeaderComponent={
           <>
-            {/* -- Profile Info -- */}
-            <View style={styles.profileInfoContainer}>
-              {/* Avatar Wrapper (Ensures `+` button is not clipped) */}
-              <View style={styles.avatarWrapper}>
-                <View style={styles.avatarContainer}>
-                  <Image style={styles.avatar} source={{ uri: mainUser.profileImage }} />
-                </View>
+            <View style={s.profileCard}>
+              <Image source={{ uri: user.profileImage }} style={s.avatar} />
+              <Text style={s.name}>{user.name}</Text>
+              <Text style={s.handle}>@{user.username}</Text>
 
-                {/* + Button overlapping bottom-right edge (outside clipping area) */}
-                <TouchableOpacity
-                  style={styles.addListingCircle}
-                  onPress={() => navigation.navigate('AddListingScreen')}
-                >
-                  <Ionicons name="add" size={22} color="#fff" />
-                </TouchableOpacity>
+              <View style={s.statRow}>
+                <Stat val={user.followers} label="Followers" />
+                <Stat val={user.following} label="Following" />
+                <Stat
+                  val={
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Ionicons name="star" size={14} color={Colors.primary} />
+                      <Text style={{ fontWeight: '700', marginLeft: 4 }}>{user.userRating.toFixed(1)}</Text>
+                    </View>
+                  }
+                  label="Rating"
+                />
               </View>
-              {/* Name and Bio */}
-              <Text style={styles.userName}>{mainUser.name}</Text>
-              <Text style={styles.userHandle}>{mainUser.username}</Text>
-              <Text style={styles.userBio}>{mainUser.bio}</Text>
 
-              {/* Stats Row */}
-              <View style={styles.statsContainer}>
-                <View style={styles.statItem}>
-                  <Text style={styles.statNumber}>{mainUser.followers}</Text>
-                  <Text style={styles.statLabel}>Followers</Text>
-                </View>
-                <View style={styles.statItem}>
-                  <Text style={styles.statNumber}>{mainUser.following}</Text>
-                  <Text style={styles.statLabel}>Following</Text>
-                </View>
-                <View style={styles.statItem}>
-                  <View style={styles.ratingRow}>
-                    <Ionicons name="star" size={16} color="#FF6211" />
-                    <Text style={styles.ratingText}>{mainUser.userRating}</Text>
-                  </View>
-                  <Text style={styles.statLabel}>Rating</Text>
-                </View>
-              </View>
+              <Text style={s.bio} numberOfLines={3}>{user.bio}</Text>
             </View>
 
-            {/* Divider */}
-            <View style={styles.divider} />
-
-            {/* Closet Section Title */}
-            <Text style={styles.closetTitle}>My Closet</Text>
+            {/* elegant divider */}
+            <View style={s.dividerBlock}>
+              <View style={s.dividerLine} />
+              <Text style={s.dividerText}>My Closet</Text>
+              <View style={s.dividerLine} />
+            </View>
           </>
         }
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={{ width: '48%' }}
-            onPress={() => navigation.navigate('Listing', { listingData: item })}
-          >
-            <ClosetCard
-              imageUrl={item.imageUrl}
-              listing={item.listing}
-              category={item.category}
-              size={item.size}
-              rentalPrice={item.rentalPrice}
-            />
-          </TouchableOpacity>
-        )}
       />
 
-      {/* Overlay when Settings are open */}
-      {isMenuOpen && <Pressable style={styles.overlay} onPress={closeMenu} />}
-
-      {/* Sliding Menu */}
-      <Animated.View
-        style={[styles.menuContainer, { transform: [{ translateX: menuAnim }] }]}
-        {...panResponder.panHandlers}
+      {/* ===== floating FAB ===== */}
+      <TouchableOpacity
+        style={s.fab}
+        activeOpacity={0.85}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          navigation.navigate('AddListingScreen');
+        }}
       >
-        <Text style={styles.menuTitle}>Settings</Text>
+        <Ionicons name="add" size={28} color="#fff" />
+      </TouchableOpacity>
 
-        {/* Example Menu Buttons */}
-        <TouchableOpacity style={styles.menuButton}>
-          <Ionicons name="person-outline" size={22} color="#000" />
-          <Text style={styles.menuButtonText}>Button 1</Text>
-        </TouchableOpacity>
-        <View style={styles.menuDivider} />
+      {/* dim overlay */}
+      {drawer && <Pressable style={s.overlay} onPress={closeDrawer} />}
 
-        <TouchableOpacity style={styles.menuButton}>
-          <Ionicons name="notifications-outline" size={22} color="#000" />
-          <Text style={styles.menuButtonText}>Button 2</Text>
-        </TouchableOpacity>
-        <View style={styles.menuDivider} />
-
-        <TouchableOpacity style={styles.menuButton}>
-          <Ionicons name="settings-outline" size={22} color="#000" />
-          <Text style={styles.menuButtonText}>Button 3</Text>
-        </TouchableOpacity>
-        <View style={styles.menuDivider} />
-
-        <TouchableOpacity style={styles.menuButton} onPress={handleLogout}>
-          <Ionicons name="log-out-outline" size={22} color="#000" />
-          <Text style={styles.menuButtonText}>Log Out</Text>
-        </TouchableOpacity>
+      {/* ===== settings drawer ===== */}
+      <Animated.View style={[s.drawer, { transform: [{ translateX: drawerX }] }]} {...pan.panHandlers}>
+        <Text style={s.drawerTitle}>Settings</Text>
+        <DrawerBtn icon="person-outline" label="Account" />
+        <DrawerBtn icon="notifications-outline" label="Notifications" />
+        <DrawerBtn icon="settings-outline" label="Preferences" />
+        <DrawerBtn
+          icon="log-out-outline"
+          label="Log out"
+          onPress={() => {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+            closeDrawer();
+          }}
+        />
       </Animated.View>
     </SafeAreaView>
   );
-};
+}
 
-export default ProfileScreen;
+/* ---------- helpers ---------- */
+const Stat = ({ val, label }: { val: any; label: string }) => (
+  <View style={s.statChip}>
+    {typeof val === 'function' ? val() : <Text style={s.statVal}>{val}</Text>}
+    <Text style={s.statLbl}>{label}</Text>
+  </View>
+);
 
-/* --- Styles --- */
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F8F9FB',
-  },
-  // Header
-  headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F8F9FB',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
-  },
-  leftPlaceholder: {
-    width: 24,
-  },
-  headerTitle: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#000',
-  },
-  headerIconButton: {
-    padding: 8,
-  },
+const DrawerBtn = ({ icon, label, onPress }: { icon: string; label: string; onPress?: () => void }) => (
+  <TouchableOpacity style={s.drawerBtn} activeOpacity={0.8} onPress={onPress}>
+    <Ionicons name={icon} size={22} color="#000" style={{ width: 28 }} />
+    <Text style={s.drawerTxt}>{label}</Text>
+    <Ionicons name="chevron-forward" size={20} color="#999" />
+  </TouchableOpacity>
+);
 
-  // Profile Info
-  profileInfoContainer: {
-    alignItems: 'center',
-    marginTop: 24,
-    paddingHorizontal: 16,
-    zIndex: 1,
-  },
- // Avatar Wrapper (Keeps add button outside)
- avatarWrapper: {
-    position: 'relative',
-    width: 120,
-    height: 120,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  // Avatar (Cropped inside container)
-  avatarContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    overflow: 'hidden', // Ensures avatar is circular and cropped
-    backgroundColor: '#eee',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  avatar: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  // + button at bottom-right edge
-  addListingCircle: {
-    position: 'absolute',
-    bottom: 0, // Keeps it at the bottom edge
-    right: 0,  // Moves it to the right edge
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#FF6211',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#fff', // White border to contrast with avatar
-    zIndex: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  userName: {
-    marginTop: 16,
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#000',
-  },
-  userHandle: {
-    marginTop: 3,
-    fontSize: 17,
-    color: '#666',
-  },
-  userBio: {
-    marginTop: 8,
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-    lineHeight: 20,
-    paddingHorizontal: 16,
-  },
-
-  // Stats
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 24,
-    width: '80%',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    paddingVertical: 16,
-    // Shadow
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  statItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  statNumber: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#000',
-  },
-  statLabel: {
-    marginTop: 4,
-    fontSize: 14,
-    color: '#666',
-  },
-  ratingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  ratingText: {
-    marginLeft: 4,
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#000',
-  },
-
-  // Divider
-  divider: {
-    height: 1,
-    width: '90%',
-    backgroundColor: '#ddd',
-    alignSelf: 'center',
-    marginVertical: 24,
-  },
-  closetTitle: {
-    marginBottom: 16,
-    marginLeft: 16,
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-  },
-
-  // Right-Side Sliding Menu
-  menuContainer: {
-    position: 'absolute',
-    top: 0,
-    right: -50,
-    width: 350,
-    height: Dimensions.get('window').height,
-    backgroundColor: '#fff',
-    paddingTop: 100,
-    paddingHorizontal: 20,
-    paddingRight: 70,
-    shadowColor: '#000',
-    shadowOffset: { width: -2, height: 0 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
-    zIndex: 20,
-  },
-  menuTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    textAlign: 'left',
-    color: '#000',
-    marginBottom: 25,
-    paddingHorizontal: 10,
-  },
-  menuButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    marginHorizontal: 10,
-  },
-  menuButtonText: {
-    color: '#000',
-    fontSize: 18,
-    fontWeight: '600',
-    marginLeft: 10,
-    letterSpacing: 0.5,
-  },
-  menuDivider: {
-    height: 1,
-    backgroundColor: '#ddd',
-    marginVertical: 0,
-    width: '100%',
-  },
-  overlay: {
+/* ---------- styles ---------- */
+const s = StyleSheet.create({
+  root: { flex: 1, backgroundColor: '#F8F9FB' },
+  /* header */
+  header: {
     position: 'absolute',
     top: 0,
     left: 0,
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(0,0,0,0)',
+    right: 0,
+    backgroundColor: '#F8F9FB',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#e8e8e8',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 4,
+    zIndex: 10,
   },
+  headerContent: { paddingHorizontal: 24 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  headerTitle: { fontWeight: '700', color: '#111' },
+  headerSub: { marginTop: 2, fontSize: 13, fontWeight: '500', color: '#666' },
+  /* profile card */
+  profileCard: {
+    marginHorizontal: 24,
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    alignItems: 'center',
+    paddingTop: AVATAR_RADIUS + 20,
+    paddingBottom: 28,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  avatar: {
+    position: 'absolute',
+    top: -AVATAR_RADIUS,
+    width: AVATAR_RADIUS * 2,
+    height: AVATAR_RADIUS * 2,
+    borderRadius: AVATAR_RADIUS,
+    borderWidth: 3,
+    borderColor: '#fff',
+  },
+  name: { fontSize: 20, fontWeight: '700', color: '#000' },
+  handle: { fontSize: 14, color: '#666', marginTop: 2 },
+  statRow: { flexDirection: 'row', marginTop: 16 },
+  statChip: {
+    backgroundColor: '#F3F4F7',
+    borderRadius: 14,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    marginHorizontal: 4,
+    alignItems: 'center',
+  },
+  statVal: { fontWeight: '700', color: '#000', fontSize: 13 },
+  statLbl: { fontSize: 11, color: '#666' },
+  bio: {
+    marginTop: 16,
+    paddingHorizontal: 24,
+    fontSize: 13,
+    lineHeight: 19,
+    color: '#444',
+    textAlign: 'center',
+  },
+  /* elegant divider */
+  dividerBlock: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 28,
+    marginHorizontal: 24,
+  },
+  dividerLine: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: '#ccc' },
+  dividerText: { marginHorizontal: 12, fontSize: 14, fontWeight: '600', color: '#666' },
+  /* FAB */
+  fab: {
+    position: 'absolute',
+    right: 24,
+    bottom: 34,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#000',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+    elevation: 6, 
+  },
+  /* settings drawer */
+  drawer: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: 300,
+    height: H,
+    backgroundColor: '#fff',
+    paddingTop: 60,
+    paddingHorizontal: 24,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: -5, height: 0 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    zIndex: 20,
+  },
+  drawerTitle: { fontSize: 22, fontWeight: '700', marginBottom: 28 },
+  drawerBtn: { flexDirection: 'row', alignItems: 'center', paddingVertical: 16},
+  drawerTxt: { flex: 1, fontSize: 16, fontWeight: '500' },
+  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.2)' },
 });

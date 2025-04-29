@@ -1,97 +1,101 @@
-import React, { useState, useEffect } from 'react';
+// =============================================================================
+// screens/UserProfileScreen.tsx – minimalist public‑profile (uses Card)
+// =============================================================================
+import React, { useState } from 'react';
 import {
   SafeAreaView,
   View,
   Text,
   StyleSheet,
   FlatList,
-  ScrollView,
   Image,
   TouchableOpacity,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient'; // Import LinearGradient for button styling
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import ClosetCard from '@/components/ClosetCard';
+import Card, { Listing } from '@/components/Card';
 import { LISTING_ITEMS } from '@/constants/MockData';
-import { SAMPLE_USERS } from '@/constants/MockData';
 
-const UserProfileScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, route }) => {
+/* -------------------------------------------------------------------------- */
+interface Props {
+  navigation: any;
+  route: { params: { userData: any } };
+}
+
+const UserProfileScreen: React.FC<Props> = ({ navigation, route }) => {
   const { userData } = route.params || {};
-  const [userCloset] = useState(LISTING_ITEMS);
+  const userListings: Listing[] = LISTING_ITEMS.filter(
+    (i) => i.listerId === userData.userId
+  );
+
+  /* ---------- render single Card ---------- */
+  const renderCard = ({ item }: { item: Listing }) => (
+    <TouchableOpacity
+      style={{ width: '48%' }}
+      onPress={() => navigation.navigate('Listing', { listingData: item })}
+    >
+      <Card
+        data={item}
+        saved={false}
+        onToggleSave={() => {}}
+        onPress={() => navigation.navigate('Listing', { listingData: item })}
+        style={{ width: '100%' }}
+      />
+    </TouchableOpacity>
+  );
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* -- Header -- */}
-      <View style={styles.headerContainer}>
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={28} color="#000" />
+    <SafeAreaView style={styles.root}>
+      {/* ===== header ===== */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={26} color="#000" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{userData.name}'s Profile</Text>
-        <View style={{ width: 28 }} /> {/* Placeholder for alignment */}
+        <View style={{ width: 26 }} /> {/* alignment placeholder */}
       </View>
 
-      {/* Use FlatList for the Entire Screen */}
+      {/* ===== list ===== */}
       <FlatList
-        data={userCloset.filter(item => item.listerId === userData.userId)}
-        keyExtractor={(item, index) => index.toString()}
+        data={userListings}
+        keyExtractor={(item) => item.id}
         numColumns={2}
-        columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 10 }}
-        ListHeaderComponent={(
+        showsVerticalScrollIndicator={false}
+        columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 12 }}
+        ListHeaderComponent={
           <>
-            {/* -- Profile Info Section -- */}
-            <View style={styles.profileInfoContainer}>
-              {/* Avatar */}
-              <View style={styles.avatarContainer}>
-                <Image style={styles.avatar} source={{ uri: userData.profileImage }} />
+            {/* profile block */}
+            <View style={styles.profileBlock}>
+              <View style={styles.avatarWrap}>
+                <Image source={{ uri: userData.profileImage }} style={styles.avatar} />
               </View>
+              <Text style={styles.name}>{userData.name}</Text>
+              <Text style={styles.bio}>{userData.bio}</Text>
 
-              {/* Name and Bio */}
-              <Text style={styles.userName}>{userData.name}</Text>
-              <Text style={styles.userBio}>{userData.bio}</Text>
-
-              {/* Stats Row */}
-              <View style={styles.statsContainer}>
-                <View style={styles.statItem}>
-                  <Text style={styles.statNumber}>{userData.followers}</Text>
-                  <Text style={styles.statLabel}>Followers</Text>
-                </View>
-                <View style={styles.statItem}>
-                  <Text style={styles.statNumber}>{userData.following}</Text>
-                  <Text style={styles.statLabel}>Following</Text>
-                </View>
-                <View style={styles.statItem}>
-                  <View style={styles.ratingRow}>
-                    <Ionicons name="star" size={16} color="#FF6211" />
-                    <Text style={styles.ratingText}>{userData.userRating}</Text>
-                  </View>
-                  <Text style={styles.statLabel}>Rating</Text>
-                </View>
+              {/* stats */}
+              <View style={styles.statsRow}>
+                <Stat value={userData.followers} label="Followers" />
+                <Stat value={userData.following} label="Following" />
+                <Stat
+                  value={
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Ionicons name="star" size={14} color="#FF6211" />
+                      <Text style={{ fontWeight: '700', marginLeft: 4 }}>
+                        {userData.userRating}
+                      </Text>
+                    </View>
+                  }
+                  label="Rating"
+                />
               </View>
             </View>
 
-            {/* -- Divider -- */}
+            {/* divider */}
             <View style={styles.divider} />
-
-            {/* -- Closet Section Title -- */}
-            <Text style={styles.closetTitle}>My Closet</Text>
+            <Text style={styles.sectionTitle}>Listings</Text>
           </>
-        )}
-        renderItem={({ item, index }) => (
-          <TouchableOpacity
-            style={{ width: '48%' }}
-            key={index}
-            onPress={() => navigation.navigate('Listing', { listingData: item })}>
-            <ClosetCard
-              imageUrl={item.imageUrl}
-              listing={item.listing}
-              category={item.category}
-              size={item.size}
-              rentalPrice={item.rentalPrice}
-            />
-          </TouchableOpacity>
-        )}
+        }
+        renderItem={renderCard}
+        ListFooterComponent={<View style={{ height: 20 }} />}
       />
     </SafeAreaView>
   );
@@ -99,78 +103,46 @@ const UserProfileScreen: React.FC<{ navigation: any, route: any }> = ({ navigati
 
 export default UserProfileScreen;
 
-/* --- Styles --- */
+/* ---------- helpers ---------- */
+const Stat = ({ value, label }: { value: any; label: string }) => (
+  <View style={styles.statItem}>
+    {typeof value === 'function' ? value() : <Text style={styles.statVal}>{value}</Text>}
+    <Text style={styles.statLbl}>{label}</Text>
+  </View>
+);
+
+/* ---------- styles ---------- */
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F8F9FB',
-  },
-  /* Header */
-  headerContainer: {
+  root: { flex: 1, backgroundColor: '#F8F9FB' },
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8F9FB',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E5E5',
+    backgroundColor: '#F8F9FB',
   },
-  leftPlaceholder: {
-    width: 24,
-  },
-  headerTitle: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#333',
-  },
-  headerIconButton: {
-    padding: 8,
-  },
-  backButton: {
-    padding: 8,
-  },
+  backBtn: { padding: 4 },
+  headerTitle: { flex: 1, textAlign: 'center', fontSize: 16, fontWeight: '700', color: '#000' },
 
-  /* ScrollView */
-  scrollView: {
-    flex: 1,
-  },
-  scrollViewContent: {
-    paddingBottom: 80,
-  },
-
-  /* Profile Info */
-  profileInfoContainer: {
-    alignItems: 'center',
-    marginTop: 24,
-    paddingHorizontal: 16,
-  },
-  avatarContainer: {
+  /* profile block */
+  profileBlock: { alignItems: 'center', marginTop: 24, paddingHorizontal: 16 },
+  avatarWrap: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    overflow: 'hidden',
     backgroundColor: '#eee',
-    // Unified shadow
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.15,
     shadowRadius: 6,
     elevation: 4,
   },
-  avatar: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  userName: {
-    marginTop: 16,
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#000',
-  },
-  userBio: {
+  avatar: { width: '100%', height: '100%', resizeMode: 'cover' },
+  name: { marginTop: 16, fontSize: 22, fontWeight: '700', color: '#000' },
+  bio: {
     marginTop: 8,
     fontSize: 14,
     color: '#666',
@@ -178,9 +150,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     paddingHorizontal: 16,
   },
-
-  /* Stats */
-  statsContainer: {
+  statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 24,
@@ -188,39 +158,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     paddingVertical: 16,
-    // Subtle shadow
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
   },
-  statItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  statNumber: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#000',
-  },
-  statLabel: {
-    marginTop: 4,
-    fontSize: 14,
-    color: '#666',
-  },
-  ratingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  ratingText: {
-    marginLeft: 4,
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#000',
-  },
+  statItem: { alignItems: 'center', flex: 1 },
+  statVal: { fontSize: 18, fontWeight: '600', color: '#000' },
+  statLbl: { marginTop: 4, fontSize: 14, color: '#666' },
 
-  /* Divider */
   divider: {
     height: 1,
     width: '90%',
@@ -228,51 +175,5 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginVertical: 24,
   },
-
-  /* Closet Title */
-  closetTitle: {
-    marginBottom: 16,
-    marginLeft: 16,
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-  },
-  gridContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginHorizontal: 16,
-  },
-
-  /* Floating Button */
-  addListingButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    position: 'absolute',
-    justifyContent: 'center',
-    bottom: 30,
-    alignSelf: 'center', 
-    backgroundColor: '#FF6211',
-    borderRadius: 30,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 6,
-    zIndex: 5,
-  },
-  gradientButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-  },
-  addListingText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 20,
-  },
+  sectionTitle: { marginLeft: 16, marginBottom: 16, fontSize: 18, fontWeight: '600', color: '#333' },
 });
